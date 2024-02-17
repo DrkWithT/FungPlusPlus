@@ -1,0 +1,5 @@
+# test01.fung
+
+use stdio
+
+puts("Hello world!")

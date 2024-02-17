@@ -1,0 +1,28 @@
+# test08.fung
+
+use stdio
+use stringify
+
+let MIN_PASS_GPA = 2.0
+
+object Student
+    field name
+    field major
+    field gpa
+end
+
+fun initStudent(ref stu, val name, val major, val gpa)
+    stu["name"] = name
+    stu["major"] = major
+    stu["gpa"] = gpa 
+end
+
+fun isStudentPassing(ref stu)
+    ret stu["gpa"] >= MIN_PASS_GPA
+end
+
+mut alice = Student {}
+
+initStudent(alice, "Alicia Rizzo", "Math", 3.3)
+
+print(toString(isStudentPassing(alice)))

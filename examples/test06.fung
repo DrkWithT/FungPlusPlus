@@ -1,0 +1,22 @@
+# test06.fung
+
+use stdio
+use stringify
+
+fun findMaxInNums(ref nums)
+    mut high = nums[0]
+    mut temp = 0
+
+    each x in nums
+        temp = x
+
+        if temp > high
+            high = temp
+        end
+    end
+
+    ret high
+end
+
+let nums = [50, 70, 100, 90, 60, 50]
+print(toString(findMaxInNums(nums)))

@@ -1,0 +1,20 @@
+# test05.fung
+
+use stdio
+use stringify
+
+fun sumNumbers(val n)
+    mut temp = 1
+    mut total = 0
+
+    while temp <= n
+        total = total + temp
+        temp = temp + 1
+    end
+
+    ret total
+end
+
+let n = 20
+let total = sumNumbers(n)
+print(toString(total))

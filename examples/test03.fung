@@ -1,0 +1,15 @@
+# test03.fung
+
+object Foo
+    field count
+end
+
+fun updateFooCount (ref other, val x)
+    other["count"] = other["count"] + x
+end
+
+mut bar = Foo {0}
+
+updateFooCount(bar, 42)
+
+print(toString(bar["count"]))

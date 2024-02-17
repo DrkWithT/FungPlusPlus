@@ -1,0 +1,16 @@
+# test02.fung
+
+use stdio
+use stringify
+
+let EMPTY = nil
+let FLAG = $T
+let SPECIAL = 42
+let PI = 3.14159265
+let MSG = "Testing"
+
+print(to_str(EMPTY))
+print(to_str(FLAG))
+print(to_str(SPECIAL))
+print(to_str(PI))
+print(to_str(MSG))

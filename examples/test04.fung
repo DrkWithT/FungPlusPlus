@@ -1,0 +1,14 @@
+# test04.fung
+
+use stdio
+use stringify
+
+fun getMax(val a, val b)
+    if a < b
+        ret b
+    end
+
+    ret a
+end
+
+print(toString(getMax(16, 42)))
