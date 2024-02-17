@@ -1,0 +1,13 @@
+# Ignore special local dirs
+.DS_Store
+.vscode
+
+# Ignore extra CMake files
+build
+CMakeFiles
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Ignore binaries
+*.o
