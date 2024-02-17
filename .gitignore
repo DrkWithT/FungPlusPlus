@@ -11,3 +11,5 @@ Makefile
 
 # Ignore binaries
 *.o
+*.a
+fungi
