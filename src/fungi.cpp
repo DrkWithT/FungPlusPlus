@@ -9,18 +9,60 @@
  * 
  */
 
+#include <algorithm>
+#include <memory>
 #include <iostream>
-#include "frontend/token.hpp"
+#include <fstream>
+#include "frontend/lexer.hpp"
 
-using namespace fung::frontend::tokens;
+using my_token_type = fung::frontend::TokenType;
 
-static const char* fake_source = "use stdio\n";
+[[nodiscard]] bool readAFile(const char* path, std::unique_ptr<char[]>& result, size_t* external_size)
+{
+    std::ifstream reader {path, std::ios::in};
+
+    if (!reader.is_open())
+    {
+        return false;
+    }
+
+    size_t input_size = 0;
+    reader.seekg(0, std::ios::end);
+    input_size = reader.tellg();
+    reader.seekg(0, std::ios::beg);
+
+    auto buffer = std::make_unique<char[]>(input_size + 1);
+
+    std::fill(buffer.get(), buffer.get() + input_size, '\0');
+
+    bool read_ok = !reader.read(buffer.get(), input_size).bad();
+
+    if (read_ok)
+    {
+        result.reset(buffer.release());
+        *external_size = input_size;
+    }
+
+    return read_ok;
+}
 
 int main (int argc, char* argv[]) {
-    std::string_view source_view {fake_source};
-    Token keyword1 {.begin = 0, .length = 3, .type = token_keyword};
+    std::unique_ptr<char[]> source_buffer {};
+    size_t my_file_size = 0;
 
-    std::string_view use_keyword = stringifyToken(keyword1, source_view);
+    if (!readAFile("./examples/test07.fung", source_buffer, &my_file_size))
+    {
+        std::cerr << "Failed to read file :(\n";
+        return 1;
+    }
 
-    std::cout << use_keyword << '\n'; // should print use
+    fung::frontend::Token temp_token {};
+    fung::frontend::Lexer lexer {source_buffer.get(), my_file_size};
+
+    do
+    {
+        temp_token = lexer.lexNext();
+
+        std::cout << "Token {type=" << temp_token.type << ", begin=" << temp_token.begin << ", length=" << temp_token.length << "}\n";
+    } while (temp_token.type != my_token_type::token_eof);
 }

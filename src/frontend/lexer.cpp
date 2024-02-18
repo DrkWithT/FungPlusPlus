@@ -205,7 +205,7 @@ namespace fung::frontend
 
         std::string lexeme_str {};
 
-        for (size_t lexeme_i = 0; lexeme_i < lexeme_i < token_length; lexeme_i++)
+        for (size_t lexeme_i = 0; lexeme_i < token_length; lexeme_i++)
         {
             lexeme_str += source_view[token_begin + lexeme_i];
         }
@@ -239,7 +239,7 @@ namespace fung::frontend
 
         std::string lexeme_str {};
 
-        for (size_t lexeme_i = 0; lexeme_i < lexeme_i < token_length; lexeme_i++)
+        for (size_t lexeme_i = 0; lexeme_i < token_length; lexeme_i++)
         {
             lexeme_str += source_view[token_begin + lexeme_i];
         }
