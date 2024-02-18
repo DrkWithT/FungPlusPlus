@@ -87,16 +87,15 @@ namespace fung::frontend
 
     bool isOperatorSymbol(char c)
     {
-        /// @note Seek the operator symbols to their ending NUL for a match to c... If the NUL is hit, then c is not a valid operator letter.
         for (size_t symbol_i = 0; symbol_i < test_operator_symbols_len; symbol_i++)
         {
             if (c == test_operator_symbols[symbol_i])
             {
-                break;
+                return true;
             }
         }
 
-        return c != '\0';
+        return false;
     }
 
     constexpr bool isNumeric(char c)
@@ -336,19 +335,6 @@ namespace fung::frontend
             return lexBetween('#', token_comment);
         }
 
-        if (isAlphabetic(letter))
-        {
-            return lexWord();
-        }
-        else if (isNumeric(letter))
-        {
-            return lexNumeric();
-        }
-        else if (isOperatorSymbol(letter))
-        {
-            return lexOperator();
-        }
-
         switch (letter)
         {
         case '\"':
@@ -371,6 +357,19 @@ namespace fung::frontend
             return lexSingleSymbol(token_rparen);
         default:
             break;
+        }
+
+        if (isAlphabetic(letter))
+        {
+            return lexWord();
+        }
+        else if (isNumeric(letter))
+        {
+            return lexNumeric();
+        }
+        else if (isOperatorSymbol(letter))
+        {
+            return lexOperator();
         }
 
         position++;
