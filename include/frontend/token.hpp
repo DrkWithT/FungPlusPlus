@@ -10,7 +10,7 @@
 
 #include <string_view>
 
-namespace fung::frontend::tokens
+namespace fung::frontend
 {
     enum TokenType
     {
@@ -20,7 +20,11 @@ namespace fung::frontend::tokens
         token_comment,
         token_keyword,
         token_identifier,
-        token_special,
+        token_special_true,
+        token_special_false,
+        token_special_nil,
+        token_integer,
+        token_float,
         token_string,
         token_op_plus,
         token_op_minus,

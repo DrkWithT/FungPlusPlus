@@ -11,7 +11,7 @@
 #include <exception>
 #include "frontend/token.hpp"
 
-namespace fung::frontend::tokens
+namespace fung::frontend
 {
     [[nodiscard]] bool testTokenPrintable(const Token &token)
     {
