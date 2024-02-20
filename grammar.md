@@ -1,7 +1,12 @@
 # Grammar
 
 ### Pre-Notes
-"?" is the nil-check operator. If the expression gets nil, an error is thrown.
+
+ * "?" is the nil-check operator. If the expression gets nil, an error is thrown.
+
+ * All functions return nil by default.
+
+ * The `main` function is required and returns nil.
 
 ### BNF Rules
 ```bnf
@@ -18,8 +23,9 @@ list ::= "[" (literal-expr)* "]"
 object ::= identifier "{" (literal-expr)* "}"
 
 ; basic expressions
-element-expr ::= nil | boolean | numeric | string | list | object | identifier
-access-expr ::= element-expr ("[" (string | numeric) "]")*
+call-expr ::= identifier "(" element-expr ("," element-expr) ")"
+element-expr ::= nil | boolean | numeric | string | list | object
+access-expr ::= (call-expr | identifier) ("[" (string | numeric) "]")*
 unary-expr ::= ("-" | "?")* access-expr
 term-expr ::= unary ("+" || "-" unary-expr)*
 factor-expr ::= term-expr ("*" || "/" term-expr)*
@@ -28,8 +34,8 @@ conditional-expr ::= comparison-expr ("&&" | "||" comparison-expr)*
 expr ::= conditional-expr
 
 ; basic stmts
-use-decl ::= "use" identifier
-var-decl ::= ("let" | "mut") identifier "=" expr
+use-stmt ::= "use" identifier
+var-stmt ::= ("let" | "mut") identifier "=" expr
 param-decl ::= ("val" | "ref") identifier
 func-decl ::= "fun" identifier "(" (param-decl)* ")" block
 field-decl ::= "field" identifier
@@ -40,8 +46,9 @@ if-stmt ::= "if" conditional-expr block (alt-stmt){0,1}
 else-stmt ::= "else" block
 while-stmt ::= "while" conditional-expr block
 each-stmt ::= "each" identifier "in" expr block
-func-call ::= identifier (expr)* ("," expr)*
-stmt ::= use-decl | var-decl | func-decl | object-decl | func-call
-block ::= (stmt)+ "end"
+expr-stmt ::= call-expr
+sub-stmt ::= var-stmt | assign-stmt | return-stmt | if-stmt | else-stmt | while-stmt | each-stmt | expr-stmt
+stmt ::= use-decl | var-stmt | func-decl | object-decl
+block ::= (sub-stmt)+ "end"
 program ::= (stmt)*
 ```
