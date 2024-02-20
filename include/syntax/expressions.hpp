@@ -50,10 +50,12 @@ namespace fung::syntax
         const FungToken& getIdentifierToken() const;
         void addArgument(const ElementExpr& arg);
         const std::vector<ElementExpr>& getArguments() const;
+
+        std::any accept(ExprVisitor<std::any>& visitor) override;
     };
 
     /// @todo Maybe add move methods for less copying in vector emplacement?
-    class ElementExpr
+    class ElementExpr : public IExpr
     {
     private:
         std::any content;
@@ -63,9 +65,11 @@ namespace fung::syntax
 
         const std::any& getContent() const;
         FungSimpleType getType() const;
+
+        std::any accept(ExprVisitor<std::any>& visitor) override;
     };
 
-    class AccessExpr
+    class AccessExpr : public IExpr
     {
     private:
         std::vector<ElementExpr> keys;
@@ -77,9 +81,11 @@ namespace fung::syntax
         void addAccessKey(ElementExpr& key_expr);
         const std::vector<ElementExpr>& getKeys() const;
         const std::variant<FungToken, CallExpr>& getLvalueVariant() const;
+
+        std::any accept(ExprVisitor<std::any>& visitor) override;
     };
 
-    class UnaryExpr
+    class UnaryExpr : public IExpr
     {
     private:
         AccessExpr inner;
@@ -89,9 +95,11 @@ namespace fung::syntax
 
         const AccessExpr& getInnerExpr() const;
         FungOperatorType getOperator() const;
+
+        std::any accept(ExprVisitor<std::any>& visitor) override;
     };
 
-    class BinaryExpr
+    class BinaryExpr : public IExpr
     {
     private:
         std::any left;
@@ -104,6 +112,8 @@ namespace fung::syntax
         const std::any& getLeftExpr() const;
         const std::any& getRightExpr() const;
         [[nodiscard]] bool isNestingUnaries() const;
+
+        std::any accept(ExprVisitor<std::any>& visitor) override;
     };
 }
 
