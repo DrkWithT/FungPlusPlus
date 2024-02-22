@@ -35,7 +35,7 @@ namespace fung::syntax
     class VarStmt : public IStmt
     {
     private:
-        std::unique_ptr<IExpr> expr;
+        std::unique_ptr<IExpr> right_expr;
         fung::frontend::Token identifier;
         bool immutable_flag;
     public:
@@ -73,7 +73,7 @@ namespace fung::syntax
         FuncDecl(const fung::frontend::Token& name_token);
 
         void addParam(const ParamDecl& param);
-        void addBodyStmt(std::unique_ptr<IStmt>& stmt_ptr);
+        void addBodyStmt(std::unique_ptr<IStmt> stmt_ptr);
 
         const BlockStmt& getBodyBlock() const;
         const std::vector<ParamDecl>& getParams() const;
@@ -82,7 +82,7 @@ namespace fung::syntax
         virtual std::any accept(StmtVisitor<std::any>& visitor) override;
     };
 
-    class FieldDecl
+    class FieldDecl : public IStmt
     {
     private:
         fung::frontend::Token name;
@@ -91,34 +91,40 @@ namespace fung::syntax
         FieldDecl(const fung::frontend::Token& field_name);
 
         const fung::frontend::Token& getName() const;
+
+        virtual std::any accept(StmtVisitor<std::any>& visitor) override;
     };
 
-    class ObjectDecl
+    class ObjectDecl : public IStmt
     {
     private:
         std::vector<FieldDecl> fields;
-        fung::frontend::Token name;
+        fung::frontend::Token type_name;
     public:
         ObjectDecl(const fung::frontend::Token& name);
 
         const std::vector<FieldDecl> getFields() const;
         void addField(const FieldDecl& field);
         const fung::frontend::Token& getName() const;
+
+        virtual std::any accept(StmtVisitor<std::any>& visitor) override;
     };
 
-    class AssignStmt
+    class AssignStmt : public IStmt
     {
     private:
-        AccessExpr lvalue;
-        std::unique_ptr<IExpr> rvalue;
+        AccessExpr var_lvalue;
+        std::unique_ptr<IExpr> var_rvalue;
     public:
         AssignStmt(AccessExpr lvalue, std::unique_ptr<IExpr> rvalue);
 
         const AccessExpr& getLValue() const;
         const std::unique_ptr<IExpr>& getRValue() const;
+
+        virtual std::any accept(StmtVisitor<std::any>& visitor) override;
     };
 
-    class ReturnStmt
+    class ReturnStmt : public IStmt
     {
     private:
         std::unique_ptr<IExpr> result;
@@ -126,9 +132,11 @@ namespace fung::syntax
         ReturnStmt(std::unique_ptr<IExpr> result_expr);
 
         const std::unique_ptr<IExpr>& getResult() const;
+
+        virtual std::any accept(StmtVisitor<std::any>& visitor) override;
     };
 
-    class IfStmt
+    class IfStmt : public IStmt
     {
     private:
         BlockStmt body;
@@ -136,14 +144,16 @@ namespace fung::syntax
         std::unique_ptr<IStmt> other;
 
     public:
-        IfStmt(BlockStmt body, std::unique_ptr<IExpr> conditional_expr, std::unique_ptr<IStmt> other_stmt);
+        IfStmt(BlockStmt block_stmt, std::unique_ptr<IExpr> conditional_expr, std::unique_ptr<IStmt> other_stmt);
 
         const BlockStmt& getBody() const;
         const std::unique_ptr<IExpr>& getConditional() const;
         const std::unique_ptr<IStmt>& getOtherElse() const;
+
+        virtual std::any accept(StmtVisitor<std::any>& visitor) override;
     };
 
-    class ElseStmt
+    class ElseStmt : public IStmt
     {
     private:
         BlockStmt body;
@@ -152,9 +162,11 @@ namespace fung::syntax
 
         const BlockStmt& getBody() const;
         void addStmt(std::unique_ptr<IStmt> stmt);
+
+        virtual std::any accept(StmtVisitor<std::any>& visitor) override;
     };
 
-    class WhileStmt
+    class WhileStmt : public IStmt
     {
     private:
         std::unique_ptr<IExpr> conditional;
@@ -165,9 +177,11 @@ namespace fung::syntax
         const std::unique_ptr<IExpr>& getConditional() const;
         const BlockStmt& getBody() const;
         void addStmt(std::unique_ptr<IStmt> stmt);
+
+        virtual std::any accept(StmtVisitor<std::any>& visitor) override;
     };
 
-    class BlockStmt
+    class BlockStmt : public IStmt
     {
     private:
         std::vector<std::unique_ptr<IStmt>> body;
@@ -176,6 +190,8 @@ namespace fung::syntax
 
         const std::vector<std::unique_ptr<IStmt>>& getBody() const;
         void addStmt(std::unique_ptr<IStmt> stmt);
+
+        virtual std::any accept(StmtVisitor<std::any>& visitor) override;
     };
 }
 
