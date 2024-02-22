@@ -35,7 +35,7 @@ expr ::= conditional-expr
 
 ; basic stmts
 use-stmt ::= "use" identifier
-var-stmt ::= ("let" | "mut") identifier "=" expr
+var-decl ::= ("let" | "mut") identifier "=" expr
 param-decl ::= ("val" | "ref") identifier
 func-decl ::= "fun" identifier "(" (param-decl)* ")" block
 field-decl ::= "field" identifier
@@ -45,9 +45,8 @@ return-stmt ::= "ret" expr
 if-stmt ::= "if" conditional-expr block (alt-stmt){0,1}
 else-stmt ::= "else" block
 while-stmt ::= "while" conditional-expr block
-each-stmt ::= "each" identifier "in" expr block
 expr-stmt ::= call-expr
-sub-stmt ::= var-stmt | assign-stmt | return-stmt | if-stmt | else-stmt | while-stmt | each-stmt | expr-stmt
+sub-stmt ::= var-stmt | assign-stmt | return-stmt | if-stmt | else-stmt | while-stmt | expr-stmt
 stmt ::= use-decl | var-stmt | func-decl | object-decl
 block ::= (sub-stmt)+ "end"
 program ::= (stmt)*
