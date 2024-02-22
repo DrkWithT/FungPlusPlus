@@ -6,8 +6,6 @@
 #include "frontend/token.hpp"
 #include "syntax/exprbase.hpp"
 
-using FungToken = fung::frontend::Token;
-
 namespace fung::syntax
 {
     /// @note Denotes literals.
