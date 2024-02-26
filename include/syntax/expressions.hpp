@@ -6,8 +6,6 @@
 #include "frontend/token.hpp"
 #include "syntax/exprbase.hpp"
 
-using FungToken = fung::frontend::Token;
-
 namespace fung::syntax
 {
     /// @note Denotes literals.
@@ -43,11 +41,11 @@ namespace fung::syntax
     {
     private:
         std::vector<ElementExpr> args;
-        FungToken identifier;
+        fung::frontend::Token identifier;
     public:
-        CallExpr(FungToken& token);
+        CallExpr(fung::frontend::Token& token);
 
-        const FungToken& getIdentifierToken() const;
+        const fung::frontend::Token& getIdentifierToken() const;
         void addArgument(const ElementExpr& arg);
         const std::vector<ElementExpr>& getArguments() const;
 
@@ -61,7 +59,7 @@ namespace fung::syntax
         std::any content;
         FungSimpleType type;
     public:
-        ElementExpr(std::any& content_box, FungSimpleType element_type);
+        ElementExpr(std::any content_box, FungSimpleType element_type);
 
         const std::any& getContent() const;
         FungSimpleType getType() const;
@@ -73,14 +71,14 @@ namespace fung::syntax
     {
     private:
         std::vector<ElementExpr> keys;
-        std::variant<FungToken, CallExpr> lvalue;
+        std::variant<fung::frontend::Token, CallExpr> lvalue;
     public:
-        AccessExpr(FungToken& token);
+        AccessExpr(fung::frontend::Token& token);
         AccessExpr(CallExpr& call_expr);
 
         void addAccessKey(ElementExpr& key_expr);
         const std::vector<ElementExpr>& getKeys() const;
-        const std::variant<FungToken, CallExpr>& getLvalueVariant() const;
+        const std::variant<fung::frontend::Token, CallExpr>& getLvalueVariant() const;
 
         std::any accept(ExprVisitor<std::any>& visitor) override;
     };
@@ -104,13 +102,15 @@ namespace fung::syntax
     private:
         std::any left;
         std::any right;
+        FungOperatorType op;
         bool nests_unaries;
     public:
-        BinaryExpr(UnaryExpr& left_expr, UnaryExpr& right_expr);
-        BinaryExpr(BinaryExpr& left_expr, BinaryExpr& right_expr);
+        BinaryExpr(UnaryExpr left_expr, UnaryExpr right_expr, FungOperatorType op_symbol);
+        BinaryExpr(BinaryExpr left_expr, BinaryExpr right_expr, FungOperatorType op_symbol);
 
         const std::any& getLeftExpr() const;
         const std::any& getRightExpr() const;
+        FungOperatorType getOperator() const;
         [[nodiscard]] bool isNestingUnaries() const;
 
         std::any accept(ExprVisitor<std::any>& visitor) override;

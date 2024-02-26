@@ -16,8 +16,8 @@ namespace fung::syntax
     class IfStmt;
     class ElseStmt;
     class WhileStmt;
-    class EachStmt;
     class BlockStmt;
+    class ExprStmt;
 
     /**
      * @brief Interface for AST walking components e.g a naive code generator.
@@ -41,7 +41,7 @@ namespace fung::syntax
         virtual ResultType visitIfStmt(const IfStmt& stmt) = 0;
         virtual ResultType visitElseStmt(const ElseStmt& stmt) = 0;
         virtual ResultType visitWhileStmt(const WhileStmt& stmt) = 0;
-        virtual ResultType visitEachStmt(const EachStmt& stmt) = 0;
+        virtual ResultType visitExprStmt(const ExprStmt& stmt) = 0;
         virtual ResultType visitBlockStmt(const BlockStmt& stmt) = 0;
     };
 }
