@@ -12,7 +12,8 @@ project(FungPlusPlus VERSION 0.1.0)
 option(USE_DEBUG_BUILD "Option of whether to compile with debug info." ON)
 
 # Compiler & Linker setup:
-# Like: gcc --std=c11 -Wall -Werror ...
+# Like: gcc --std=c++17 -Wall -Werror ...
+set(EXECUTABLE_OUTPUT_PATH "${CMAKE_HOME_DIRECTORY}/bin")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
