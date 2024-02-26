@@ -2,4 +2,4 @@
 
 add_library(syntax "")
 
-target_sources(syntax PRIVATE expressions.cpp)
+target_sources(syntax PRIVATE expressions.cpp statements.cpp)
