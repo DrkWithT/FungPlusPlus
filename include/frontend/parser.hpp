@@ -1,39 +1,23 @@
 #ifndef PARSER_HPP
 #define PARSER_HPP
 
+#include <iostream>
+#include <sstream>
 #include "frontend/lexer.hpp"
 #include "syntax/expressions.hpp"
-
-// using FungCallExpr = fung::syntax::CallExpr;
-// using FungElemExpr = fung::syntax::ElementExpr;
-// using FungAcssExpr = fung::syntax::AccessExpr;
-// using FungUnryExpr = fung::syntax::UnaryExpr;
-// using FungBnryExpr = fung::syntax::BinaryExpr;
+#include "syntax/statements.hpp"
 
 namespace fung::frontend
 {
-    enum ParserStatus
-    {
-        fung_parse_ok,
-        fung_parse_unexpected_token,
-        fung_parse_generic_error
-    };
-
-    struct ParserDumpState
-    {
-        Token error_token;
-        ParserStatus status;
-    };
-
     class ProgramUnit
     {
     private:
-        std::vector<std::any> statements;
+        std::vector<std::unique_ptr<fung::syntax::IStmt>> statements;
         std::string name;
     public:
         ProgramUnit(const std::string& unit_name);
 
-        const std::vector<std::any>& getStatements() const;
+        const std::vector<std::unique_ptr<fung::syntax::IStmt>>& getStatements() const;
         const std::string& getName() const;
     };
 
@@ -41,25 +25,53 @@ namespace fung::frontend
     {
     private:
         Lexer lexer;
+        std::ostringstream sout;
+        std::string_view source_viewer;
         Token previous;
         Token current;
+
+        /* Token helpers */
+
+        const Token& getPrevious() const;
+        const Token& getCurrent() const;
+
+        [[nodiscard]] bool matchToken(TokenType type);
+        [[nodiscard]] Token advanceToken();
+        void consumeToken(TokenType type);
+
+        void reportError(Token token, const std::string& msg_header);
+        void synchronizeParse();
+
+        /* Expr helpers */
+
+        std::unique_ptr<fung::syntax::IExpr> parseElement();
+        std::unique_ptr<fung::syntax::IExpr> parseCall();
+        std::unique_ptr<fung::syntax::IExpr> parseAccess();
+        std::unique_ptr<fung::syntax::IExpr> parseUnary();
+        std::unique_ptr<fung::syntax::IExpr> parseTerm();
+        std::unique_ptr<fung::syntax::IExpr> parseFactor();
+        std::unique_ptr<fung::syntax::IExpr> parseComparison();
+        std::unique_ptr<fung::syntax::IExpr> parseConditional();
+
+        /* Stmt helpers */
+
+        std::unique_ptr<fung::syntax::IStmt> parseUse();
+        std::unique_ptr<fung::syntax::IStmt> parseVar();
+        std::unique_ptr<fung::syntax::IStmt> parseParam();
+        std::unique_ptr<fung::syntax::IStmt> parseFunc();
+        std::unique_ptr<fung::syntax::IStmt> parseField();
+        std::unique_ptr<fung::syntax::IStmt> parseObject();
+        std::unique_ptr<fung::syntax::IStmt> parseAssign();
+        std::unique_ptr<fung::syntax::IStmt> parseReturn();
+        std::unique_ptr<fung::syntax::IStmt> parseIf();
+        std::unique_ptr<fung::syntax::IStmt> parseElse();
+        std::unique_ptr<fung::syntax::IStmt> parseBlock();
+        std::unique_ptr<fung::syntax::IStmt> parseSubStmt();
+        std::unique_ptr<fung::syntax::IStmt> parseStmt();
     public:
-        Parser(const std::string_view& source_view);
+        Parser(const char* source_cptr, size_t source_size);
 
-        fung::syntax::ElementExpr parseElement();
-
-        fung::syntax::CallExpr parseCall();
-
-        fung::syntax::AccessExpr parseAccess();
-
-        fung::syntax::UnaryExpr parseUnary();
-
-        fung::syntax::BinaryExpr parseBinary();
-
-        /// TODO Add AST nodes for stmts...
-        /// TODO Add parsing methods for stmts...
-
-        ParserDumpState parseFile(ProgramUnit& unit);
+        [[nodiscard]] bool parseFile(ProgramUnit& unit);
     };
 }
 

@@ -24,12 +24,12 @@ object ::= identifier "{" (literal-expr)* "}"
 
 ; basic expressions
 call-expr ::= identifier "(" element-expr ("," element-expr) ")"
-element-expr ::= nil | boolean | numeric | string | list | object
+element-expr ::= nil | boolean | numeric | string | list | object | (expr)
 access-expr ::= (call-expr | identifier) ("[" (string | numeric) "]")*
-unary-expr ::= ("-" | "?")* access-expr
-term-expr ::= unary ("+" || "-" unary-expr)*
-factor-expr ::= term-expr ("*" || "/" term-expr)*
-comparison-expr ::= factor-expr ("==" || "!=" || "<=" || ">=" || "<" || ">" factor-expr)*
+unary-expr ::= ("-" | "?")* (access-expr | element-expr)
+factor-expr ::= unary-expr ("*" || "/" unary-expr)*
+term-expr ::= factor-expr ("+" || "-" factor-expr)*
+comparison-expr ::= term-expr ("==" || "!=" || "<=" || ">=" || "<" || ">" term-expr)*
 conditional-expr ::= comparison-expr ("&&" | "||" comparison-expr)*
 expr ::= conditional-expr
 
