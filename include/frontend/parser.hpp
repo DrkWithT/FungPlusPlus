@@ -1,7 +1,7 @@
 #ifndef PARSER_HPP
 #define PARSER_HPP
 
-#include <iostream>
+#include <array>
 #include <sstream>
 #include "frontend/lexer.hpp"
 #include "syntax/expressions.hpp"
@@ -37,9 +37,10 @@ namespace fung::frontend
 
         [[nodiscard]] bool matchToken(TokenType type);
         [[nodiscard]] Token advanceToken();
-        void consumeToken(TokenType type);
 
-        void reportError(Token token, const std::string& msg_header);
+        void consumeToken(const std::array<TokenType, 4>& types);
+
+        void reportError(const Token& token, const std::string& msg_header);
         void synchronizeParse();
 
         /* Expr helpers */
