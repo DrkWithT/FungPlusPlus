@@ -25,7 +25,7 @@ object ::= identifier "{" (literal-expr ",")* "}"
 ; basic expressions
 call-expr ::= identifier "(" (element-expr ",")* ")"
 element-expr ::= nil | boolean | numeric | string | list | object | (expr)
-access-expr ::= identifier ("[" (string | numeric) "]")*
+access-expr ::= identifier "[" ((string | numeric) ",")* "]"
 unary-expr ::= ("-" | "?")* (access-expr | element-expr)
 factor-expr ::= unary-expr ("*" || "/" unary-expr)*
 term-expr ::= factor-expr ("+" || "-" factor-expr)*
