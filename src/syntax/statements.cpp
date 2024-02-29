@@ -15,7 +15,7 @@ namespace fung::syntax
 {
     /* UseStmt impl */
 
-    UseStmt::UseStmt(const std::string& identifier_lexeme)
+    UseStmt::UseStmt(std::string& identifier_lexeme)
     : identifier(std::move(identifier_lexeme)) {}
 
     const std::string& UseStmt::getIdentifier() const
@@ -30,7 +30,7 @@ namespace fung::syntax
 
     /* VarStmt impl. */
 
-    VarStmt::VarStmt(std::unique_ptr<IExpr> expr, const std::string& identifier_lexeme, bool is_let)
+    VarStmt::VarStmt(std::unique_ptr<IExpr> expr, std::string& identifier_lexeme, bool is_let)
     : right_expr(std::move(expr)), identifier(std::move(identifier_lexeme)), immutable_flag {is_let} {}
 
     const std::unique_ptr<IExpr>& VarStmt::getRXpr() const
@@ -55,7 +55,7 @@ namespace fung::syntax
 
     /* ParamDecl impl. */
 
-    ParamDecl::ParamDecl(const std::string& idenfitier_lexeme, bool is_value)
+    ParamDecl::ParamDecl(std::string& idenfitier_lexeme, bool is_value)
     : identifier(std::move(idenfitier_lexeme)), value_flag {is_value} {}
 
     const std::string& ParamDecl::getIdentifier() const
@@ -74,8 +74,8 @@ namespace fung::syntax
     }
 
     /* FuncDecl impl. */
-    FuncDecl::FuncDecl(const std::string& name_token)
-    : body {}, params {}, name {name_token} {}
+    FuncDecl::FuncDecl(std::string& name_token)
+    : body {}, params {}, name(std::move(name_token)) {}
 
     void FuncDecl::addParam(const ParamDecl& param)
     {
@@ -109,7 +109,7 @@ namespace fung::syntax
 
     /* FieldDecl impl. */
 
-    FieldDecl::FieldDecl(const std::string& field_name)
+    FieldDecl::FieldDecl(std::string& field_name)
     : name(std::move(field_name)) {}
 
     const std::string& FieldDecl::getName() const
@@ -124,7 +124,7 @@ namespace fung::syntax
 
     /* ObjectDecl */
 
-    ObjectDecl::ObjectDecl(const std::string& name_lexeme)
+    ObjectDecl::ObjectDecl(std::string& name_lexeme)
     : fields {}, type_name(std::move(name_lexeme)) {}
 
     const std::vector<FieldDecl> ObjectDecl::getFields() const
@@ -241,6 +241,21 @@ namespace fung::syntax
     std::any WhileStmt::accept(StmtVisitor<std::any>& visitor)
     {
         return visitor.visitWhileStmt(*this);
+    }
+
+    /* ExprStmt impl. */
+
+    ExprStmt::ExprStmt(std::string& callee_name)
+    : name(std::move(callee_name)) {}
+
+    const std::string& ExprStmt::getCalleeName() const
+    {
+        return name;
+    }
+
+    std::any ExprStmt::accept(StmtVisitor<std::any>& visitor)
+    {
+        visitor.visitExprStmt(*this);
     }
 
     /* BlockStmt impl. */

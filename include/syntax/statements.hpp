@@ -25,7 +25,7 @@ namespace fung::syntax
     private:
         std::string identifier;
     public:
-        UseStmt(const std::string& identifier_lexeme);
+        UseStmt(std::string& identifier_lexeme);
 
         const std::string& getIdentifier() const;
 
@@ -39,7 +39,7 @@ namespace fung::syntax
         std::string identifier;
         bool immutable_flag;
     public:
-        VarStmt(std::unique_ptr<IExpr> expr, const std::string& identifier_lexeme, bool is_let);
+        VarStmt(std::unique_ptr<IExpr> expr, std::string& identifier_lexeme, bool is_let);
 
         const std::unique_ptr<IExpr>& getRXpr() const;
         const std::string& getIdentifier() const;
@@ -54,7 +54,7 @@ namespace fung::syntax
         std::string identifier;
         bool value_flag;
     public:
-        ParamDecl(const std::string& idenfitier_lexeme, bool is_value);
+        ParamDecl(std::string& idenfitier_lexeme, bool is_value);
 
         const std::string& getIdentifier() const;
         bool isValue() const;
@@ -70,7 +70,7 @@ namespace fung::syntax
         std::string name;
 
     public:
-        FuncDecl(const std::string& name_lexeme);
+        FuncDecl(std::string& name_lexeme);
 
         void addParam(const ParamDecl& param);
         void addBodyStmt(std::unique_ptr<IStmt> stmt_ptr);
@@ -88,7 +88,7 @@ namespace fung::syntax
         std::string name;
     
     public:
-        FieldDecl(const std::string& field_name);
+        FieldDecl(std::string& field_name);
 
         const std::string& getName() const;
 
@@ -101,7 +101,7 @@ namespace fung::syntax
         std::vector<FieldDecl> fields;
         std::string type_name;
     public:
-        ObjectDecl(const std::string& name_lexeme);
+        ObjectDecl(std::string& name_lexeme);
 
         const std::vector<FieldDecl> getFields() const;
         void addField(const FieldDecl& field);
@@ -161,6 +161,18 @@ namespace fung::syntax
         ElseStmt(std::unique_ptr<IStmt> body_block);
 
         const std::unique_ptr<IStmt>& getBody() const;
+
+        virtual std::any accept(StmtVisitor<std::any>& visitor) override;
+    };
+
+    class ExprStmt : public IStmt
+    {
+    private:
+        std::string name;
+    public:
+        ExprStmt(std::string& callee_name);
+
+        const std::string& getCalleeName() const;
 
         virtual std::any accept(StmtVisitor<std::any>& visitor) override;
     };

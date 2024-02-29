@@ -15,9 +15,9 @@ namespace fung::syntax
     class ReturnStmt;
     class IfStmt;
     class ElseStmt;
+    class ExprStmt;
     class WhileStmt;
     class BlockStmt;
-    class ExprStmt;
 
     /**
      * @brief Interface for AST walking components e.g a naive code generator.
