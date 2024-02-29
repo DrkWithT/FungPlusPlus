@@ -8,16 +8,17 @@
  * 
  */
 
+#include <utility>
 #include "syntax/statements.hpp"
 
 namespace fung::syntax
 {
     /* UseStmt impl */
 
-    UseStmt::UseStmt(const fung::frontend::Token& identifier_token)
-    : identifier {identifier_token} {}
+    UseStmt::UseStmt(const std::string& identifier_lexeme)
+    : identifier(std::move(identifier_lexeme)) {}
 
-    const fung::frontend::Token& UseStmt::getIdentifier() const
+    const std::string& UseStmt::getIdentifier() const
     {
         return identifier;
     }
@@ -29,15 +30,15 @@ namespace fung::syntax
 
     /* VarStmt impl. */
 
-    VarStmt::VarStmt(std::unique_ptr<IExpr> expr, const fung::frontend::Token& identifier_token, bool is_let)
-    : right_expr(std::move(expr)), identifier {identifier_token}, immutable_flag {is_let} {}
+    VarStmt::VarStmt(std::unique_ptr<IExpr> expr, const std::string& identifier_lexeme, bool is_let)
+    : right_expr(std::move(expr)), identifier(std::move(identifier_lexeme)), immutable_flag {is_let} {}
 
     const std::unique_ptr<IExpr>& VarStmt::getRXpr() const
     {
         return right_expr;
     }
     
-    const fung::frontend::Token& VarStmt::getIdentifier() const
+    const std::string& VarStmt::getIdentifier() const
     {
         return identifier;
     }
@@ -54,10 +55,10 @@ namespace fung::syntax
 
     /* ParamDecl impl. */
 
-    ParamDecl::ParamDecl(const fung::frontend::Token& idenfitier_token, bool is_value)
-    : identifier {idenfitier_token}, value_flag {is_value} {}
+    ParamDecl::ParamDecl(const std::string& idenfitier_lexeme, bool is_value)
+    : identifier(std::move(idenfitier_lexeme)), value_flag {is_value} {}
 
-    const fung::frontend::Token& ParamDecl::getIdentifier() const
+    const std::string& ParamDecl::getIdentifier() const
     {
         return identifier;
     }
@@ -73,7 +74,7 @@ namespace fung::syntax
     }
 
     /* FuncDecl impl. */
-    FuncDecl::FuncDecl(const fung::frontend::Token& name_token)
+    FuncDecl::FuncDecl(const std::string& name_token)
     : body {}, params {}, name {name_token} {}
 
     void FuncDecl::addParam(const ParamDecl& param)
@@ -96,7 +97,7 @@ namespace fung::syntax
         return params;
     }
     
-    const fung::frontend::Token& FuncDecl::getName() const
+    const std::string& FuncDecl::getName() const
     {
         return name;
     }
@@ -108,10 +109,10 @@ namespace fung::syntax
 
     /* FieldDecl impl. */
 
-    FieldDecl::FieldDecl(const fung::frontend::Token& field_name)
-    : name {field_name} {}
+    FieldDecl::FieldDecl(const std::string& field_name)
+    : name(std::move(field_name)) {}
 
-    const fung::frontend::Token& FieldDecl::getName() const
+    const std::string& FieldDecl::getName() const
     {
         return name;
     }
@@ -123,8 +124,8 @@ namespace fung::syntax
 
     /* ObjectDecl */
 
-    ObjectDecl::ObjectDecl(const fung::frontend::Token& name)
-    : fields {}, type_name {name} {}
+    ObjectDecl::ObjectDecl(const std::string& name_lexeme)
+    : fields {}, type_name(std::move(name_lexeme)) {}
 
     const std::vector<FieldDecl> ObjectDecl::getFields() const
     {
@@ -136,7 +137,7 @@ namespace fung::syntax
         fields.push_back(field);
     }
 
-    const fung::frontend::Token& ObjectDecl::getName() const
+    const std::string& ObjectDecl::getName() const
     {
         return type_name;
     }
@@ -148,15 +149,15 @@ namespace fung::syntax
 
     /* AssignStmt impl. */
 
-    AssignStmt::AssignStmt(AccessExpr lvalue, std::unique_ptr<IExpr> rvalue)
-    : var_lvalue {lvalue}, var_rvalue(std::move(rvalue)) {}
+    AssignStmt::AssignStmt(std::unique_ptr<fung::syntax::IExpr> lvalue, std::unique_ptr<IExpr> rvalue)
+    : var_lvalue(std::move(lvalue)), var_rvalue(std::move(rvalue)) {}
 
-    const AccessExpr& AssignStmt::getLValue() const
+    const std::unique_ptr<fung::syntax::IExpr>& AssignStmt::getLValue() const
     {
         return var_lvalue;
     }
 
-    const std::unique_ptr<IExpr>& AssignStmt::getRValue() const
+    const std::unique_ptr<fung::syntax::IExpr>& AssignStmt::getRValue() const
     {
         return var_rvalue;
     }
@@ -184,17 +185,17 @@ namespace fung::syntax
 
     /* IfStmt impl. */
 
-    IfStmt::IfStmt(BlockStmt block_stmt, std::unique_ptr<IExpr> conditional_expr, std::unique_ptr<IStmt> other_stmt)
-    : body {block_stmt}, conditional(std::move(conditional_expr)), other(std::move(other_stmt)) {}
-
-    const BlockStmt& IfStmt::getBody() const
-    {
-        return body;
-    }
+    IfStmt::IfStmt(std::unique_ptr<IExpr> conditional_expr, std::unique_ptr<IStmt> block_stmt, std::unique_ptr<IStmt> other_stmt)
+    : conditional(std::move(conditional_expr)), body(std::move(block_stmt)), other(std::move(other_stmt)) {}
 
     const std::unique_ptr<IExpr>& IfStmt::getConditional() const
     {
         return conditional;
+    }
+
+    const std::unique_ptr<IStmt>& IfStmt::getBody() const
+    {
+        return body;
     }
 
     const std::unique_ptr<IStmt>& IfStmt::getOtherElse() const
@@ -209,17 +210,12 @@ namespace fung::syntax
 
     /* ElseStmt impl. */
 
-    ElseStmt::ElseStmt()
-    : body {} {}
+    ElseStmt::ElseStmt(std::unique_ptr<IStmt> body_block)
+    : body(std::move(body_block)) {}
 
-    const BlockStmt& ElseStmt::getBody() const
+    const std::unique_ptr<IStmt>& ElseStmt::getBody() const
     {
         return body;
-    }
-
-    void ElseStmt::addStmt(std::unique_ptr<IStmt> stmt)
-    {
-        body.addStmt(std::move(stmt));
     }
 
     std::any ElseStmt::accept(StmtVisitor<std::any>& visitor)
@@ -229,22 +225,17 @@ namespace fung::syntax
 
     /* WhileStmt impl. */
 
-    WhileStmt::WhileStmt(std::unique_ptr<IExpr> conditional_expr)
-    : conditional(std::move(conditional_expr)), body {} {}
+    WhileStmt::WhileStmt(std::unique_ptr<IExpr> conditional_expr, std::unique_ptr<IStmt> body_stmt)
+    : conditional(std::move(conditional_expr)), body(std::move(body_stmt)) {}
 
     const std::unique_ptr<IExpr>& WhileStmt::getConditional() const
     {
         return conditional;
     }
 
-    const BlockStmt& WhileStmt::getBody() const
+    const std::unique_ptr<IStmt>& WhileStmt::getBody() const
     {
         return body;
-    }
-
-    void WhileStmt::addStmt(std::unique_ptr<IStmt> stmt)
-    {
-        body.addStmt(std::move(stmt));
     }
 
     std::any WhileStmt::accept(StmtVisitor<std::any>& visitor)

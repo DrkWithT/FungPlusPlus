@@ -23,11 +23,11 @@ namespace fung::syntax
     class UseStmt : public IStmt
     {
     private:
-        fung::frontend::Token identifier;
+        std::string identifier;
     public:
-        UseStmt(const fung::frontend::Token& identifier_token);
+        UseStmt(const std::string& identifier_lexeme);
 
-        const fung::frontend::Token& getIdentifier() const;
+        const std::string& getIdentifier() const;
 
         virtual std::any accept(StmtVisitor<std::any>& visitor) override;
     };
@@ -36,13 +36,13 @@ namespace fung::syntax
     {
     private:
         std::unique_ptr<IExpr> right_expr;
-        fung::frontend::Token identifier;
+        std::string identifier;
         bool immutable_flag;
     public:
-        VarStmt(std::unique_ptr<IExpr> expr, const fung::frontend::Token& identifier_token, bool is_let);
+        VarStmt(std::unique_ptr<IExpr> expr, const std::string& identifier_lexeme, bool is_let);
 
         const std::unique_ptr<IExpr>& getRXpr() const;
-        const fung::frontend::Token& getIdentifier() const;
+        const std::string& getIdentifier() const;
         bool isImmutable() const;
 
         virtual std::any accept(StmtVisitor<std::any>& visitor) override;
@@ -51,12 +51,12 @@ namespace fung::syntax
     class ParamDecl : public IStmt
     {
     private:
-        fung::frontend::Token identifier;
+        std::string identifier;
         bool value_flag;
     public:
-        ParamDecl(const fung::frontend::Token& idenfitier_token, bool is_value);
+        ParamDecl(const std::string& idenfitier_lexeme, bool is_value);
 
-        const fung::frontend::Token& getIdentifier() const;
+        const std::string& getIdentifier() const;
         bool isValue() const;
 
         virtual std::any accept(StmtVisitor<std::any>& visitor) override;
@@ -67,17 +67,17 @@ namespace fung::syntax
     private:
         BlockStmt body;
         std::vector<ParamDecl> params;
-        fung::frontend::Token name;
+        std::string name;
 
     public:
-        FuncDecl(const fung::frontend::Token& name_token);
+        FuncDecl(const std::string& name_lexeme);
 
         void addParam(const ParamDecl& param);
         void addBodyStmt(std::unique_ptr<IStmt> stmt_ptr);
 
         const BlockStmt& getBodyBlock() const;
         const std::vector<ParamDecl>& getParams() const;
-        const fung::frontend::Token& getName() const;
+        const std::string& getName() const;
 
         virtual std::any accept(StmtVisitor<std::any>& visitor) override;
     };
@@ -85,12 +85,12 @@ namespace fung::syntax
     class FieldDecl : public IStmt
     {
     private:
-        fung::frontend::Token name;
+        std::string name;
     
     public:
-        FieldDecl(const fung::frontend::Token& field_name);
+        FieldDecl(const std::string& field_name);
 
-        const fung::frontend::Token& getName() const;
+        const std::string& getName() const;
 
         virtual std::any accept(StmtVisitor<std::any>& visitor) override;
     };
@@ -99,13 +99,13 @@ namespace fung::syntax
     {
     private:
         std::vector<FieldDecl> fields;
-        fung::frontend::Token type_name;
+        std::string type_name;
     public:
-        ObjectDecl(const fung::frontend::Token& name);
+        ObjectDecl(const std::string& name_lexeme);
 
         const std::vector<FieldDecl> getFields() const;
         void addField(const FieldDecl& field);
-        const fung::frontend::Token& getName() const;
+        const std::string& getName() const;
 
         virtual std::any accept(StmtVisitor<std::any>& visitor) override;
     };
@@ -113,12 +113,12 @@ namespace fung::syntax
     class AssignStmt : public IStmt
     {
     private:
-        AccessExpr var_lvalue;
+        std::unique_ptr<IExpr> var_lvalue;
         std::unique_ptr<IExpr> var_rvalue;
     public:
-        AssignStmt(AccessExpr lvalue, std::unique_ptr<IExpr> rvalue);
+        AssignStmt(std::unique_ptr<IExpr> lvalue, std::unique_ptr<IExpr> rvalue);
 
-        const AccessExpr& getLValue() const;
+        const std::unique_ptr<IExpr>& getLValue() const;
         const std::unique_ptr<IExpr>& getRValue() const;
 
         virtual std::any accept(StmtVisitor<std::any>& visitor) override;
@@ -139,15 +139,15 @@ namespace fung::syntax
     class IfStmt : public IStmt
     {
     private:
-        BlockStmt body;
         std::unique_ptr<IExpr> conditional;
+        std::unique_ptr<IStmt> body;
         std::unique_ptr<IStmt> other;
 
     public:
-        IfStmt(BlockStmt block_stmt, std::unique_ptr<IExpr> conditional_expr, std::unique_ptr<IStmt> other_stmt);
+        IfStmt(std::unique_ptr<IExpr> conditional_expr, std::unique_ptr<IStmt> block_stmt, std::unique_ptr<IStmt> other_stmt);
 
-        const BlockStmt& getBody() const;
         const std::unique_ptr<IExpr>& getConditional() const;
+        const std::unique_ptr<IStmt>& getBody() const;
         const std::unique_ptr<IStmt>& getOtherElse() const;
 
         virtual std::any accept(StmtVisitor<std::any>& visitor) override;
@@ -156,12 +156,11 @@ namespace fung::syntax
     class ElseStmt : public IStmt
     {
     private:
-        BlockStmt body;
+        std::unique_ptr<IStmt> body;
     public:
-        ElseStmt();
+        ElseStmt(std::unique_ptr<IStmt> body_block);
 
-        const BlockStmt& getBody() const;
-        void addStmt(std::unique_ptr<IStmt> stmt);
+        const std::unique_ptr<IStmt>& getBody() const;
 
         virtual std::any accept(StmtVisitor<std::any>& visitor) override;
     };
@@ -170,13 +169,12 @@ namespace fung::syntax
     {
     private:
         std::unique_ptr<IExpr> conditional;
-        BlockStmt body;
+        std::unique_ptr<IStmt> body;
     public:
-        WhileStmt(std::unique_ptr<IExpr> conditional_expr);
+        WhileStmt(std::unique_ptr<IExpr> conditional_expr, std::unique_ptr<IStmt> body_stmt);
 
         const std::unique_ptr<IExpr>& getConditional() const;
-        const BlockStmt& getBody() const;
-        void addStmt(std::unique_ptr<IStmt> stmt);
+        const std::unique_ptr<IStmt>& getBody() const;
 
         virtual std::any accept(StmtVisitor<std::any>& visitor) override;
     };
