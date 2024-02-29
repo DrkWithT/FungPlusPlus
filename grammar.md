@@ -19,11 +19,11 @@ nil ::= "$N"
 boolean ::= "$T" | "$F"
 numeric ::= (DIGIT)+ "." (DIGIT)+
 string ::= "\"" (non-double-quotes) "\""
-list ::= "[" (literal-expr)* "]"
-object ::= identifier "{" (literal-expr)* "}"
+list ::= "[" (literal-expr ",")* "]"
+object ::= identifier "{" (literal-expr ",")* "}"
 
 ; basic expressions
-call-expr ::= identifier "(" element-expr ("," element-expr) ")"
+call-expr ::= identifier "(" (element-expr ",")* ")"
 element-expr ::= nil | boolean | numeric | string | list | object | (expr)
 access-expr ::= (call-expr | identifier) ("[" (string | numeric) "]")*
 unary-expr ::= ("-" | "?")* (access-expr | element-expr)
