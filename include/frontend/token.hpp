@@ -9,6 +9,7 @@
  */
 
 #include <string_view>
+#include <string>
 
 namespace fung::frontend
 {
@@ -59,4 +60,6 @@ namespace fung::frontend
     [[nodiscard]] bool testTokenPrintable(const Token& token);
 
     std::string_view stringifyToken(const Token& token, const std::string_view& source);
+
+    std::string stringifyTokenFully(const Token& token, const std::string_view& source);
 }

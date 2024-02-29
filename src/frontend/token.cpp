@@ -27,4 +27,17 @@ namespace fung::frontend
 
         return source.substr(token.begin, token.length);
     }
+
+    std::string stringifyTokenFully(const Token& token, const std::string_view& source)
+    {
+        std::string lexeme {};
+        auto lexeme_strview = stringifyToken(token, source);
+
+        for (const auto& ch : lexeme_strview)
+        {
+            lexeme += ch;
+        }
+
+        return lexeme;
+    }
 }
