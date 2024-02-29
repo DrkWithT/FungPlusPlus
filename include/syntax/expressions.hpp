@@ -1,6 +1,7 @@
 #ifndef EXPRESSIONS_HPP
 #define EXPRESSIONS_HPP
 
+#include <memory>
 #include <variant>
 #include <vector>
 #include "frontend/token.hpp"
@@ -14,6 +15,7 @@ namespace fung::syntax
         fung_simple_type_nil,
         fung_simple_type_bool,
         fung_simple_type_int,
+        fung_simple_type_float,
         fung_simple_type_string,
         fung_simple_type_list,
         fung_simple_type_object
@@ -40,14 +42,14 @@ namespace fung::syntax
     class CallExpr : public IExpr
     {
     private:
-        std::vector<ElementExpr> args;
-        fung::frontend::Token identifier;
+        std::vector<std::unique_ptr<fung::syntax::IExpr>> args;
+        std::string identifier;
     public:
-        CallExpr(fung::frontend::Token& token);
+        CallExpr(const std::string& lexeme);
 
-        const fung::frontend::Token& getIdentifierToken() const;
-        void addArgument(const ElementExpr& arg);
-        const std::vector<ElementExpr>& getArguments() const;
+        const std::string& getIdentifier() const;
+        void addArgument(std::unique_ptr<fung::syntax::IExpr> arg);
+        const std::vector<std::unique_ptr<fung::syntax::IExpr>>& getArguments() const;
 
         std::any accept(ExprVisitor<std::any>& visitor) override;
     };
@@ -70,15 +72,15 @@ namespace fung::syntax
     class AccessExpr : public IExpr
     {
     private:
-        std::vector<ElementExpr> keys;
-        std::variant<fung::frontend::Token, CallExpr> lvalue;
+        std::vector<std::unique_ptr<IExpr>> keys;
+        std::variant<std::string, CallExpr> lvalue;
     public:
-        AccessExpr(fung::frontend::Token& token);
-        AccessExpr(CallExpr& call_expr);
+        AccessExpr(std::string& left_name);
+        AccessExpr(CallExpr& left_expr);
 
-        void addAccessKey(ElementExpr& key_expr);
-        const std::vector<ElementExpr>& getKeys() const;
-        const std::variant<fung::frontend::Token, CallExpr>& getLvalueVariant() const;
+        void addAccessKey(std::unique_ptr<IExpr> key_expr);
+        const std::vector<std::unique_ptr<IExpr>>& getKeys() const;
+        const std::variant<std::string, CallExpr>& getLvalueVariant() const;
 
         std::any accept(ExprVisitor<std::any>& visitor) override;
     };
@@ -86,12 +88,12 @@ namespace fung::syntax
     class UnaryExpr : public IExpr
     {
     private:
-        AccessExpr inner;
+        std::unique_ptr<IExpr> inner; // AccessExpr!
         FungOperatorType op;
     public:
-        UnaryExpr(AccessExpr& inner_expr,         FungOperatorType op_type);
+        UnaryExpr(std::unique_ptr<IExpr> inner_expr, FungOperatorType op_type);
 
-        const AccessExpr& getInnerExpr() const;
+        const std::unique_ptr<IExpr>& getInnerExpr() const;
         FungOperatorType getOperator() const;
 
         std::any accept(ExprVisitor<std::any>& visitor) override;
@@ -100,16 +102,16 @@ namespace fung::syntax
     class BinaryExpr : public IExpr
     {
     private:
-        std::any left;
-        std::any right;
+        std::unique_ptr<IExpr> left;
+        std::unique_ptr<IExpr> right;
         FungOperatorType op;
         bool nests_unaries;
     public:
-        BinaryExpr(UnaryExpr left_expr, UnaryExpr right_expr, FungOperatorType op_symbol);
-        BinaryExpr(BinaryExpr left_expr, BinaryExpr right_expr, FungOperatorType op_symbol);
+        BinaryExpr(std::unique_ptr<IExpr> left_binexpr, std::unique_ptr<IExpr> right_binexpr, FungOperatorType op_symbol);
+        BinaryExpr(std::unique_ptr<IExpr> left_binexpr, std::unique_ptr<IExpr> right_binexpr, FungOperatorType op_symbol);
 
-        const std::any& getLeftExpr() const;
-        const std::any& getRightExpr() const;
+        const std::unique_ptr<IExpr>& getLeftExpr() const;
+        const std::unique_ptr<IExpr>& getRightExpr() const;
         FungOperatorType getOperator() const;
         [[nodiscard]] bool isNestingUnaries() const;
 

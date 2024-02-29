@@ -18,21 +18,20 @@ namespace fung::syntax
 {
     /* CallExpr impl. */
 
-    CallExpr::CallExpr(FungToken& token)
-    : args {}, identifier {token}
-    {}
+    CallExpr::CallExpr(const std::string& token)
+    : args {}, identifier(std::move(token)) {}
 
-    const FungToken& CallExpr::getIdentifierToken() const
+    const std::string& CallExpr::getIdentifier() const
     {
         return identifier;
     }
-    
-    void CallExpr::addArgument(const ElementExpr& arg)
+
+    void CallExpr::addArgument(std::unique_ptr<IExpr> arg)
     {
-        args.emplace_back(arg);
+        args.emplace_back(std::move(arg));
     }
-    
-    const std::vector<ElementExpr>& CallExpr::getArguments() const
+
+    const std::vector<std::unique_ptr<IExpr>>& CallExpr::getArguments() const
     {
         return args;
     }
@@ -45,8 +44,7 @@ namespace fung::syntax
     /* ElementExpr impl. */
 
     ElementExpr::ElementExpr(std::any content_box, FungSimpleType element_type)
-    : content(std::move(content_box)), type {element_type}
-    {}
+    : content(std::move(content_box)), type {element_type} {}
 
     const std::any& ElementExpr::getContent() const
     {
@@ -65,10 +63,10 @@ namespace fung::syntax
 
     /* AccessExpr impl. */
 
-    AccessExpr::AccessExpr(FungToken& token)
+    AccessExpr::AccessExpr(std::string& left_name)
     : keys {}, lvalue {}
     {
-        lvalue = token;
+        lvalue = std::move(left_name);
     }
 
     AccessExpr::AccessExpr(CallExpr& call_expr)
@@ -77,17 +75,17 @@ namespace fung::syntax
         lvalue = call_expr;
     }
 
-    void AccessExpr::addAccessKey(ElementExpr& key_expr)
+    void AccessExpr::addAccessKey(std::unique_ptr<IExpr> key_expr)
     {
-        keys.emplace_back(key_expr);
+        keys.emplace_back(std::move(key_expr));
     }
 
-    const std::vector<ElementExpr>& AccessExpr::getKeys() const
+    const std::vector<std::unique_ptr<IExpr>>& AccessExpr::getKeys() const
     {
         return keys;
     }
 
-    const std::variant<FungToken, CallExpr>& AccessExpr::getLvalueVariant() const
+    const std::variant<std::string, CallExpr>& AccessExpr::getLvalueVariant() const
     {
         return lvalue;
     }
@@ -99,11 +97,10 @@ namespace fung::syntax
 
     /* UnaryExpr impl. */
 
-    UnaryExpr::UnaryExpr(AccessExpr& inner_expr, FungOperatorType op_type)
-    : inner {inner_expr}, op {op_type}
-    {}
+    UnaryExpr::UnaryExpr(std::unique_ptr<IExpr> inner_expr, FungOperatorType op_type)
+    : inner(std::move(inner_expr)), op {op_type} {}
 
-    const AccessExpr& UnaryExpr::getInnerExpr() const
+    const std::unique_ptr<IExpr>& UnaryExpr::getInnerExpr() const
     {
         return inner;
     }
@@ -120,26 +117,18 @@ namespace fung::syntax
 
     /* BinaryExpr impl. */
 
-    BinaryExpr::BinaryExpr(UnaryExpr left_expr, UnaryExpr right_expr, FungOperatorType op_symbol)
-    : left {}, right {}, op {op_symbol}, nests_unaries {true}
-    {
-        left = left_expr;
-        right = right_expr;
-    }
+    BinaryExpr::BinaryExpr(std::unique_ptr<IExpr> left_binexpr, std::unique_ptr<IExpr> right_binexpr, FungOperatorType op_symbol)
+    : left(std::move(left_binexpr)), right(std::move(right_binexpr)), op {op_symbol}, nests_unaries {true} {}
 
-    BinaryExpr::BinaryExpr(BinaryExpr left_expr, BinaryExpr right_expr, FungOperatorType op_symbol)
-    : left {}, right {}, op {op_symbol}, nests_unaries {false}
-    {
-        left = left_expr;
-        right = right_expr;
-    }
+    BinaryExpr::BinaryExpr(std::unique_ptr<IExpr> left_binexpr, std::unique_ptr<IExpr> right_binexpr, FungOperatorType op_symbol)
+    : left(std::move(left_binexpr)), right(std::move(right_binexpr)), op {op_symbol}, nests_unaries {false} {}
 
-    const std::any& BinaryExpr::getLeftExpr() const
+    const std::unique_ptr<IExpr>& BinaryExpr::getLeftExpr() const
     {
         return left;
     }
 
-    const std::any& BinaryExpr::getRightExpr() const
+    const std::unique_ptr<IExpr>& BinaryExpr::getRightExpr() const
     {
         return right;
     }
