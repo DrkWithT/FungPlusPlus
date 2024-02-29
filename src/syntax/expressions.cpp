@@ -64,16 +64,7 @@ namespace fung::syntax
     /* AccessExpr impl. */
 
     AccessExpr::AccessExpr(std::string& left_name)
-    : keys {}, lvalue {}
-    {
-        lvalue = std::move(left_name);
-    }
-
-    AccessExpr::AccessExpr(CallExpr& call_expr)
-    : keys {}, lvalue {}
-    {
-        lvalue = call_expr;
-    }
+    : keys {}, lvalue(std::move(left_name)) {}
 
     void AccessExpr::addAccessKey(std::unique_ptr<IExpr> key_expr)
     {
@@ -85,7 +76,7 @@ namespace fung::syntax
         return keys;
     }
 
-    const std::variant<std::string, CallExpr>& AccessExpr::getLvalueVariant() const
+    const std::string& AccessExpr::getLvalueName() const
     {
         return lvalue;
     }

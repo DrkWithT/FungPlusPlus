@@ -73,14 +73,13 @@ namespace fung::syntax
     {
     private:
         std::vector<std::unique_ptr<IExpr>> keys;
-        std::variant<std::string, CallExpr> lvalue;
+        std::string lvalue;
     public:
         AccessExpr(std::string& left_name);
-        AccessExpr(CallExpr& left_expr);
 
         void addAccessKey(std::unique_ptr<IExpr> key_expr);
         const std::vector<std::unique_ptr<IExpr>>& getKeys() const;
-        const std::variant<std::string, CallExpr>& getLvalueVariant() const;
+        const std::string& getLvalueName() const;
 
         std::any accept(ExprVisitor<std::any>& visitor) override;
     };
