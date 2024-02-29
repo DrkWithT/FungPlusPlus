@@ -1,7 +1,7 @@
 #ifndef PARSER_HPP
 #define PARSER_HPP
 
-#include <array>
+#include <initializer_list>
 #include <sstream>
 #include "frontend/lexer.hpp"
 #include "syntax/expressions.hpp"
@@ -38,19 +38,21 @@ namespace fung::frontend
         [[nodiscard]] bool matchToken(TokenType type);
         [[nodiscard]] Token advanceToken();
 
-        void consumeToken(const std::array<TokenType, 4>& types);
+        void consumeToken(std::initializer_list<TokenType> types);
 
         void reportError(const Token& token, const std::string& msg_header);
         void synchronizeParse();
 
         /* Expr helpers */
 
+        std::vector<std::unique_ptr<fung::syntax::IExpr>> parseListLiteral();
+        std::vector<std::unique_ptr<fung::syntax::IExpr>>  parseObjectLiteral();
         std::unique_ptr<fung::syntax::IExpr> parseElement();
         std::unique_ptr<fung::syntax::IExpr> parseCall();
         std::unique_ptr<fung::syntax::IExpr> parseAccess();
         std::unique_ptr<fung::syntax::IExpr> parseUnary();
-        std::unique_ptr<fung::syntax::IExpr> parseTerm();
         std::unique_ptr<fung::syntax::IExpr> parseFactor();
+        std::unique_ptr<fung::syntax::IExpr> parseTerm();
         std::unique_ptr<fung::syntax::IExpr> parseComparison();
         std::unique_ptr<fung::syntax::IExpr> parseConditional();
 
