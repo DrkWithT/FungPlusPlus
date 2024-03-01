@@ -16,6 +16,7 @@ namespace fung::frontend
     public:
         ProgramUnit(const std::string& unit_name);
 
+        void appendStmt(std::unique_ptr<fung::syntax::IStmt> stmt);
         const std::vector<std::unique_ptr<fung::syntax::IStmt>>& getStatements() const;
         const std::string& getName() const;
     };
@@ -67,8 +68,8 @@ namespace fung::frontend
         std::unique_ptr<fung::syntax::IStmt> parseIf();
         std::unique_ptr<fung::syntax::IStmt> parseElse();
         std::unique_ptr<fung::syntax::IStmt> parseWhile();
-        std::unique_ptr<fung::syntax::IStmt> parseBlock();
         std::unique_ptr<fung::syntax::IStmt> parseSubStmt();
+        std::unique_ptr<fung::syntax::IStmt> parseBlock();
         std::unique_ptr<fung::syntax::IStmt> parseStmt();
     public:
         Parser(const char* source_cptr, size_t source_size);

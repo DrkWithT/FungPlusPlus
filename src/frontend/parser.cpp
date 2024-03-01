@@ -28,6 +28,9 @@ namespace fung::frontend
     static const char* keyword_object = "object";
     static const char* keyword_end = "end";
     static const char* keyword_ret = "ret";
+    static const char* keyword_if = "if";
+    static const char* keyword_else = "else";
+    static const char* keyword_while = "while";
 
     /* ProgramUnit impl. */
 
@@ -37,6 +40,11 @@ namespace fung::frontend
     const std::vector<std::unique_ptr<fung::syntax::IStmt>>& ProgramUnit::getStatements() const
     {
         return statements;
+    }
+
+    void ProgramUnit::appendStmt(std::unique_ptr<fung::syntax::IStmt> stmt)
+    {
+        statements.emplace_back(std::move(stmt));
     }
 
     const std::string& ProgramUnit::getName() const
@@ -633,16 +641,166 @@ namespace fung::frontend
         return std::make_unique<fung::syntax::ReturnStmt>(std::move(result_expr));
     }
 
-    // std::unique_ptr<fung::syntax::IStmt> parseIf();
-    // std::unique_ptr<fung::syntax::IStmt> parseElse();
-    // std::unique_ptr<fung::syntax::IStmt> parseWhile();
-    // std::unique_ptr<fung::syntax::IStmt> parseExprStmt();
-    // std::unique_ptr<fung::syntax::IStmt> parseBlock();
-    // std::unique_ptr<fung::syntax::IStmt> parseSubStmt();
-    // std::unique_ptr<fung::syntax::IStmt> parseStmt();
+    std::unique_ptr<fung::syntax::IStmt> Parser::parseIf()
+    {
+        consumeToken({TokenType::token_keyword});
+
+        if (stringifyToken(getPrevious(), source_viewer) != keyword_if)
+        {
+            reportError(getPrevious(), "Invalid keyword for if stmt: ");
+        }
+
+        auto conditional_expr = parseConditional();
+        std::vector<std::unique_ptr<fung::syntax::IStmt>> stmts {};
+        bool has_else;
+
+        while (!matchToken(TokenType::token_eof))
+        {
+            auto inner_stmt = parseSubStmt();
+            stmts.emplace_back(std::move(inner_stmt));
+
+            if (stringifyToken(getCurrent(), source_viewer) == keyword_end)
+            {
+                has_else = false;
+                break;
+            }
+
+            if (stringifyToken(getCurrent(), source_viewer) == keyword_else)
+            {
+                has_else = true;
+                break;
+            }
+        }
+        
+        auto if_block = std::make_unique<fung::syntax::BlockStmt>(std::move(stmts));
+
+        if (has_else)
+        {
+            auto other_else = parseElse();
+
+            return std::make_unique<fung::syntax::IfStmt>(std::move(conditional_expr), std::move(if_block), std::move(other_else));
+        }
+
+        consumeToken({TokenType::token_keyword});
+
+        return std::make_unique<fung::syntax::IfStmt>(std::move(conditional_expr), std::move(if_block));
+    }
+
+    std::unique_ptr<fung::syntax::IStmt> Parser::parseElse()
+    {
+        consumeToken({TokenType::token_keyword});
+
+        if (stringifyToken(getPrevious(), source_viewer) != keyword_else)
+        {
+            reportError(getPrevious(), "Invalid keyword for else stmt: ");
+        }
+
+        auto block = parseBlock();
+
+        return std::make_unique<fung::syntax::ElseStmt>(std::move(block));
+    }
+
+    std::unique_ptr<fung::syntax::IStmt> Parser::parseWhile()
+    {
+        consumeToken({TokenType::token_keyword});
+
+        if (stringifyToken(getPrevious(), source_viewer) != keyword_while)
+        {
+            reportError(getPrevious(), "Invalid keyword for while stmt: ");
+        }
+
+        auto loop_conditions = parseConditional();
+        auto loop_body = parseBlock();
+
+        return std::make_unique<fung::syntax::WhileStmt>(std::move(loop_conditions), std::move(loop_body));
+    }
+
+    std::unique_ptr<fung::syntax::IStmt> Parser::parseSubStmt()
+    {
+        if (matchToken(TokenType::token_identifier))
+        {
+            return parseAssignOrExprStmt();
+        }
+        else if (stringifyToken(getCurrent(), source_viewer) == keyword_let || stringifyToken(getCurrent(), source_viewer) == keyword_mut)
+        {
+            return parseVar();
+        }
+        else if (stringifyToken(getCurrent(), source_viewer) == keyword_if)
+        {
+            return parseIf();
+        }
+        else if (stringifyToken(getCurrent(), source_viewer) == keyword_while)
+        {
+            return parseWhile();
+        }
+        else if (stringifyToken(getCurrent(), source_viewer) == keyword_ret)
+        {
+            return parseReturn();
+        }
+
+        reportError(getCurrent(), "Unexpected token for block-lvl statement: ");
+    }
+
+    std::unique_ptr<fung::syntax::IStmt> Parser::parseBlock()
+    {
+        std::vector<std::unique_ptr<fung::syntax::IStmt>> stmts {};
+
+        while (!matchToken(TokenType::token_eof))
+        {
+            if (stringifyToken(getCurrent(), source_viewer) == keyword_end)
+            {
+                break;
+            }
+
+            auto inner_stmt = parseSubStmt();
+            stmts.emplace_back(std::move(inner_stmt));
+        }
+
+        consumeToken({TokenType::token_keyword});
+
+        return std::make_unique<fung::syntax::BlockStmt>(std::move(stmts));
+    }
+
+    std::unique_ptr<fung::syntax::IStmt> Parser::parseStmt()
+    {
+        if (stringifyToken(getCurrent(), source_viewer) == keyword_use)
+        {
+            return parseUse();
+        }
+        else if (stringifyToken(getCurrent(), source_viewer) == keyword_let || stringifyToken(getCurrent(), source_viewer) == keyword_mut)
+        {
+            return parseVar();
+        }
+        else if (stringifyToken(getCurrent(), source_viewer) == keyword_fun)
+        {
+            return parseFunc();
+        }
+        else if (stringifyToken(getCurrent(), source_viewer) == keyword_object)
+        {
+            return parseObject();
+        }
+    }
 
     /* Parser public impl. */
 
-    // Parser(const char* source_cptr, size_t source_size);
-    // [[nodiscard]] bool parseFile(ProgramUnit& unit);
+    Parser::Parser(const char* source_cptr, size_t source_size)
+    : lexer {source_cptr, source_size}, source_viewer {source_cptr}, previous {.type = TokenType::token_eof}, current {.type = TokenType::token_eof} {}
+
+    [[nodiscard]] bool Parser::parseFile(ProgramUnit& unit)
+    {
+        consumeToken({TokenType::token_eof});
+
+        while (!matchToken(TokenType::token_eof))
+        {
+            try
+            {
+                ; // append stmt to unit!
+            }
+            catch (std::invalid_argument& parse_err)
+            {
+                std::cerr << parse_err.what() << '\n';
+                synchronizeParse();
+            }
+        }
+    }
 }
