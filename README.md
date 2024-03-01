@@ -5,11 +5,12 @@ This is yet another toy language called Fung after one of its keywords called "f
 
 ### TODO
  - Create grammar. (DONE)
- - Create lexer and token.
- - Create all AST parts.
- - Create parser.
+ - Create lexer and token. (DONE)
+ - Create all AST parts. (DONE)
+ - Create parser. (WIP and TESTING)
  - Create VM and specify its instruction set.
  - Create VM code generator.
 
 ### Other Notes
  - Only building on *nix systems is supported.
+ - The code is still a WIP and unstable.
