@@ -21,8 +21,10 @@ fun isStudentPassing(ref stu)
     ret stu["gpa"] >= MIN_PASS_GPA
 end
 
-mut alice = Student {}
+fun main()
+    mut alice = Student {}
+    initStudent(alice, "Alicia Rizzo", "Math", 3.3)
 
-initStudent(alice, "Alicia Rizzo", "Math", 3.3)
-
-print(toString(isStudentPassing(alice)))
+    print(toString(isStudentPassing(alice)))
+    ret $T
+end

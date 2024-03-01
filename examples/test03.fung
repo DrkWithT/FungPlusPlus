@@ -8,8 +8,11 @@ fun updateFooCount (ref other, val x,)
     other["count"] = other["count"] + x
 end
 
-mut bar = Foo {0}
+fun main()
+    mut bar = Foo {0}
+    updateFooCount(bar, 42)
 
-updateFooCount(bar, 42)
+    print(toString(bar["count"]))
 
-print(toString(bar["count"]))
+    ret $T
+end

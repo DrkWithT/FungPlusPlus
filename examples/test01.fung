@@ -2,4 +2,8 @@
 
 use stdio
 
-puts("Hello world!")
+fun main()
+    puts("Hello world!")
+
+    ret $T
+end

@@ -11,4 +11,7 @@ fun getMax(val a, val b,)
     ret a
 end
 
-print(toString(getMax(16, 42)))
+fun main()
+    print(toString(getMax(16, 42)))
+    ret $T
+end

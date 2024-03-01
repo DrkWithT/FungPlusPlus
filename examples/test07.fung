@@ -15,4 +15,7 @@ fun doFib(val n,)
     ret doFib(n - 1) + doFib(n - 2)
 end
 
-print(toString(doFib(5)))
+fun main()
+    print(toString(doFib(5)))
+    ret $T
+end

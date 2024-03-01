@@ -3,20 +3,14 @@
 use stdio
 use stringify
 
-fun findMaxInNums(ref nums,)
-    mut high = nums[0]
-    mut temp = 0
-
-    each x in nums
-        temp = x
-
-        if temp > high
-            high = temp
-        end
-    end
-
-    ret high
+fun findTriMax(val a, val b, val c)
+    if a >= b && a >= c
+        ret a
+    else if b >= a && b >= c
+        ret b
+    else
+        ret c
+    end end
 end
 
-let nums = [50, 70, 100, 90, 60, 50]
-print(toString(findMaxInNums(nums)))
+print(toString(findMaxInNums(1, 2, 3)))

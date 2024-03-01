@@ -9,8 +9,12 @@ let SPECIAL = 42
 let PI = 3.14159265
 let MSG = "Testing"
 
-print(to_str(EMPTY))
-print(to_str(FLAG))
-print(to_str(SPECIAL))
-print(to_str(PI))
-print(to_str(MSG))
+fun main()
+    print(to_str(EMPTY))
+    print(to_str(FLAG))
+    print(to_str(SPECIAL))
+    print(to_str(PI))
+    print(to_str(MSG))
+
+    ret $T
+end

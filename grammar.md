@@ -42,11 +42,11 @@ field-decl ::= "field" identifier
 object-decl ::= "object" identifier (field-decl)* "end"
 assign-stmt ::= access-expr "=" expr
 return-stmt ::= "ret" expr
-if-stmt ::= "if" conditional-expr block (alt-stmt){0,1}
+if-stmt ::= "if" conditional-expr block (else-stmt){0,1}
 else-stmt ::= "else" block
 while-stmt ::= "while" conditional-expr block
 expr-stmt ::= call-expr
-sub-stmt ::= var-stmt | assign-stmt | return-stmt | if-stmt | else-stmt | while-stmt | expr-stmt
+sub-stmt ::= assign-stmt | expr-stmt | var-stmt | if-stmt | while-stmt | return-stmt
 stmt ::= use-decl | var-stmt | func-decl | object-decl
 block ::= (sub-stmt)+ "end"
 program ::= (stmt)*
