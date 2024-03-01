@@ -3,7 +3,7 @@
 use stdio
 use stringify
 
-fun findMaxInNums(ref nums)
+fun findMaxInNums(ref nums,)
     mut high = nums[0]
     mut temp = 0
 

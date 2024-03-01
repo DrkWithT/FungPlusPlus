@@ -37,7 +37,7 @@ expr ::= conditional-expr
 use-stmt ::= "use" identifier
 var-decl ::= ("let" | "mut") identifier "=" expr
 param-decl ::= ("val" | "ref") identifier
-func-decl ::= "fun" identifier "(" (param-decl)* ")" block
+func-decl ::= "fun" identifier "(" (param-decl ",")* ")" block
 field-decl ::= "field" identifier
 object-decl ::= "object" identifier (field-decl)* "end"
 assign-stmt ::= access-expr "=" expr

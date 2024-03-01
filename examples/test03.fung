@@ -4,7 +4,7 @@ object Foo
     field count
 end
 
-fun updateFooCount (ref other, val x)
+fun updateFooCount (ref other, val x,)
     other["count"] = other["count"] + x
 end
 

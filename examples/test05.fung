@@ -3,7 +3,7 @@
 use stdio
 use stringify
 
-fun sumNumbers(val n)
+fun sumNumbers(val n,)
     mut temp = 1
     mut total = 0
 

@@ -3,7 +3,7 @@
 use stdio
 use stringify
 
-fun getMax(val a, val b)
+fun getMax(val a, val b,)
     if a < b
         ret b
     end

@@ -3,7 +3,7 @@
 use stdio
 use stringify
 
-fun doFib(val n)
+fun doFib(val n,)
     if n <= 0
         ret 0
     end

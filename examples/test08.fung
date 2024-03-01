@@ -11,7 +11,7 @@ object Student
     field gpa
 end
 
-fun initStudent(ref stu, val name, val major, val gpa)
+fun initStudent(ref stu, val name, val major, val gpa,)
     stu["name"] = name
     stu["major"] = major
     stu["gpa"] = gpa 
