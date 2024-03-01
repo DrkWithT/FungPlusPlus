@@ -140,9 +140,9 @@ namespace fung::syntax
         std::unique_ptr<IExpr> conditional;
         std::unique_ptr<IStmt> body;
         std::unique_ptr<IStmt> other;
-
     public:
         IfStmt(std::unique_ptr<IExpr> conditional_expr, std::unique_ptr<IStmt> block_stmt, std::unique_ptr<IStmt> other_stmt);
+        IfStmt(std::unique_ptr<IExpr> conditional_expr, std::unique_ptr<IStmt> block_stmt);
 
         const std::unique_ptr<IExpr>& getConditional() const;
         const std::unique_ptr<IStmt>& getBody() const;
@@ -196,10 +196,9 @@ namespace fung::syntax
     private:
         std::vector<std::unique_ptr<IStmt>> body;
     public:
-        BlockStmt();
+        BlockStmt(std::vector<std::unique_ptr<IStmt>> body_stmts);
 
         const std::vector<std::unique_ptr<IStmt>>& getBody() const;
-        void addStmt(std::unique_ptr<IStmt> stmt);
 
         virtual std::any accept(StmtVisitor<std::any>& visitor) override;
     };

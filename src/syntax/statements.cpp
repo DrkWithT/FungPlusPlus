@@ -178,6 +178,9 @@ namespace fung::syntax
     IfStmt::IfStmt(std::unique_ptr<IExpr> conditional_expr, std::unique_ptr<IStmt> block_stmt, std::unique_ptr<IStmt> other_stmt)
     : conditional(std::move(conditional_expr)), body(std::move(block_stmt)), other(std::move(other_stmt)) {}
 
+    IfStmt::IfStmt(std::unique_ptr<IExpr> conditional_expr, std::unique_ptr<IStmt> block_stmt)
+    : conditional(std::move(conditional_expr)), body(std::move(block_stmt)), other {} {}
+
     const std::unique_ptr<IExpr>& IfStmt::getConditional() const
     {
         return conditional;
@@ -255,17 +258,12 @@ namespace fung::syntax
 
     /* BlockStmt impl. */
 
-    BlockStmt::BlockStmt()
-    : body {} {}
+    BlockStmt::BlockStmt(std::vector<std::unique_ptr<IStmt>> body_stmts)
+    : body(std::move(body_stmts)) {}
 
     const std::vector<std::unique_ptr<IStmt>>& BlockStmt::getBody() const
     {
         return body;
-    }
-
-    void BlockStmt::addStmt(std::unique_ptr<IStmt> stmt)
-    {
-        body.emplace_back(std::move(stmt));
     }
 
     std::any BlockStmt::accept(StmtVisitor<std::any>& visitor)
