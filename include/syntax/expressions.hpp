@@ -77,8 +77,8 @@ namespace fung::syntax
     public:
         AccessExpr(std::string& left_name);
 
-        void addAccessKey(std::unique_ptr<IExpr> key_expr);
-        const std::vector<std::unique_ptr<IExpr>>& getKeys() const;
+        void AccessExpr::addAccessKey(std::unique_ptr<IExpr> key_expr);
+        const std::vector<std::unique_ptr<IExpr>>& AccessExpr::getKeys() const;
         const std::string& getLvalueName() const;
 
         std::any accept(ExprVisitor<std::any>& visitor) override;

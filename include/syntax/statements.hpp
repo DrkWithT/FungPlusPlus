@@ -65,18 +65,17 @@ namespace fung::syntax
     class FuncDecl : public IStmt
     {
     private:
-        BlockStmt body;
-        std::vector<ParamDecl> params;
+        std::unique_ptr<IStmt> body;
+        std::vector<std::unique_ptr<IStmt>> params;
         std::string name;
 
     public:
-        FuncDecl(std::string& name_lexeme);
+        FuncDecl(std::unique_ptr<IStmt> body_stmt, std::vector<std::unique_ptr<IStmt>> param_list, std::string& name_lexeme);
 
-        void addParam(const ParamDecl& param);
-        void addBodyStmt(std::unique_ptr<IStmt> stmt_ptr);
+        void addParam(const std::unique_ptr<IStmt>& param_decl);
 
-        const BlockStmt& getBodyBlock() const;
-        const std::vector<ParamDecl>& getParams() const;
+        const std::unique_ptr<IStmt>& getBodyBlock() const;
+        const std::vector<std::unique_ptr<IStmt>>& getParams() const;
         const std::string& getName() const;
 
         virtual std::any accept(StmtVisitor<std::any>& visitor) override;
@@ -98,13 +97,12 @@ namespace fung::syntax
     class ObjectDecl : public IStmt
     {
     private:
-        std::vector<FieldDecl> fields;
+        std::vector<std::unique_ptr<IStmt>> fields;
         std::string type_name;
     public:
-        ObjectDecl(std::string& name_lexeme);
+        ObjectDecl(std::vector<std::unique_ptr<IStmt>> field_list, std::string& name_lexeme);
 
-        const std::vector<FieldDecl> getFields() const;
-        void addField(const FieldDecl& field);
+        const std::vector<std::unique_ptr<IStmt>>& getFields() const;
         const std::string& getName() const;
 
         virtual std::any accept(StmtVisitor<std::any>& visitor) override;
@@ -168,11 +166,13 @@ namespace fung::syntax
     class ExprStmt : public IStmt
     {
     private:
-        std::string name;
+        std::vector<std::unique_ptr<fung::syntax::IExpr>> arg_list;
+        std::unique_ptr<fung::syntax::IExpr> accessor;
     public:
-        ExprStmt(std::string& callee_name);
+        ExprStmt(std::vector<std::unique_ptr<fung::syntax::IExpr>> args, std::unique_ptr<fung::syntax::IExpr> access_expr);
 
-        const std::string& getCalleeName() const;
+        const std::vector<std::unique_ptr<fung::syntax::IExpr>>& getArgList() const;
+        const std::unique_ptr<fung::syntax::IExpr>& getAccessor() const;
 
         virtual std::any accept(StmtVisitor<std::any>& visitor) override;
     };

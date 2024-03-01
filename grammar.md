@@ -23,7 +23,7 @@ list ::= "[" (literal-expr ",")* "]"
 object ::= identifier "{" (literal-expr ",")* "}"
 
 ; basic expressions
-call-expr ::= identifier "(" (element-expr ",")* ")"
+call-expr ::= access-expr "(" (element-expr ",")* ")"
 element-expr ::= nil | boolean | numeric | string | list | object | (expr)
 access-expr ::= identifier "[" ((string | numeric) ",")* "]"
 unary-expr ::= ("-" | "?")* (access-expr | element-expr)

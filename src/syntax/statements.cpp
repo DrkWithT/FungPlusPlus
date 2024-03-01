@@ -74,29 +74,24 @@ namespace fung::syntax
     }
 
     /* FuncDecl impl. */
-    FuncDecl::FuncDecl(std::string& name_token)
-    : body {}, params {}, name(std::move(name_token)) {}
+    FuncDecl::FuncDecl(std::unique_ptr<IStmt> body_stmt, std::vector<std::unique_ptr<IStmt>> param_list, std::string& name_lexeme)
+    : body(std::move(body_stmt)), params(std::move(param_list)), name(std::move(name_lexeme)) {}
 
-    void FuncDecl::addParam(const ParamDecl& param)
+    void FuncDecl::addParam(const std::unique_ptr<IStmt>& param_decl)
     {
-        params.push_back(param);
+        params.emplace_back(std::move(param_decl));
     }
 
-    void FuncDecl::addBodyStmt(std::unique_ptr<IStmt> stmt_ptr)
-    {
-        body.addStmt(std::move(stmt_ptr));
-    }
-
-    const BlockStmt& FuncDecl::getBodyBlock() const
+    const std::unique_ptr<IStmt>& FuncDecl::getBodyBlock() const
     {
         return body;
     }
-    
-    const std::vector<ParamDecl>& FuncDecl::getParams() const
+
+    const std::vector<std::unique_ptr<IStmt>>& FuncDecl::getParams() const
     {
         return params;
     }
-    
+
     const std::string& FuncDecl::getName() const
     {
         return name;
@@ -124,17 +119,12 @@ namespace fung::syntax
 
     /* ObjectDecl */
 
-    ObjectDecl::ObjectDecl(std::string& name_lexeme)
-    : fields {}, type_name(std::move(name_lexeme)) {}
+    ObjectDecl::ObjectDecl(std::vector<std::unique_ptr<IStmt>> field_list, std::string& name_lexeme)
+    : fields(std::move(field_list)), type_name(std::move(name_lexeme)) {}
 
-    const std::vector<FieldDecl> ObjectDecl::getFields() const
+    const std::vector<std::unique_ptr<IStmt>>& ObjectDecl::getFields() const
     {
         return fields;
-    }
-    
-    void ObjectDecl::addField(const FieldDecl& field)
-    {
-        fields.push_back(field);
     }
 
     const std::string& ObjectDecl::getName() const
@@ -245,12 +235,17 @@ namespace fung::syntax
 
     /* ExprStmt impl. */
 
-    ExprStmt::ExprStmt(std::string& callee_name)
-    : name(std::move(callee_name)) {}
+    ExprStmt::ExprStmt(std::vector<std::unique_ptr<fung::syntax::IExpr>> args, std::unique_ptr<fung::syntax::IExpr> access_expr)
+    : arg_list(std::move(args)), accessor(std::move(access_expr)) {}
 
-    const std::string& ExprStmt::getCalleeName() const
+    const std::vector<std::unique_ptr<fung::syntax::IExpr>>& ExprStmt::getArgList() const
     {
-        return name;
+        return arg_list;
+    }
+
+    const std::unique_ptr<fung::syntax::IExpr>& ExprStmt::getAccessor() const
+    {
+        return accessor;
     }
 
     std::any ExprStmt::accept(StmtVisitor<std::any>& visitor)
