@@ -2,7 +2,6 @@
 #define PARSER_HPP
 
 #include <initializer_list>
-#include <sstream>
 #include "frontend/lexer.hpp"
 #include "syntax/expressions.hpp"
 #include "syntax/statements.hpp"
@@ -25,7 +24,6 @@ namespace fung::frontend
     {
     private:
         Lexer lexer;
-        std::ostringstream sout;
         std::string_view source_viewer;
         Token previous;
         Token current;
@@ -64,10 +62,11 @@ namespace fung::frontend
         std::unique_ptr<fung::syntax::IStmt> parseFunc();
         std::unique_ptr<fung::syntax::IStmt> parseField();
         std::unique_ptr<fung::syntax::IStmt> parseObject();
-        std::unique_ptr<fung::syntax::IStmt> parseAssign();
+        std::unique_ptr<fung::syntax::IStmt> parseAssignOrExprStmt();
         std::unique_ptr<fung::syntax::IStmt> parseReturn();
         std::unique_ptr<fung::syntax::IStmt> parseIf();
         std::unique_ptr<fung::syntax::IStmt> parseElse();
+        std::unique_ptr<fung::syntax::IStmt> parseWhile();
         std::unique_ptr<fung::syntax::IStmt> parseBlock();
         std::unique_ptr<fung::syntax::IStmt> parseSubStmt();
         std::unique_ptr<fung::syntax::IStmt> parseStmt();
