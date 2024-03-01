@@ -9,6 +9,7 @@
  */
 
 #include <iostream>
+#include <sstream>
 #include <utility>
 #include "frontend/parser.hpp"
 
@@ -16,6 +17,17 @@ namespace fung::frontend
 {
     using FungLiteralType = fung::syntax::FungSimpleType;
     using FungOpType = fung::syntax::FungOperatorType;
+
+    static const char* keyword_use = "use";
+    static const char* keyword_let = "let";
+    static const char* keyword_mut = "mut";
+    static const char* keyword_val = "val";
+    static const char* keyword_ref = "ref";
+    static const char* keyword_fun = "fun";
+    static const char* keyword_field = "field";
+    static const char* keyword_object = "object";
+    static const char* keyword_end = "end";
+    static const char* keyword_ret = "ret";
 
     /* ProgramUnit impl. */
 
@@ -285,6 +297,8 @@ namespace fung::frontend
         }
 
         consumeToken({TokenType::token_rbrack});
+
+        return std::make_unique<fung::syntax::AccessExpr>(lvalue_name, std::move(keys));
     }
 
     std::unique_ptr<fung::syntax::IExpr> Parser::parseUnary()
@@ -417,19 +431,218 @@ namespace fung::frontend
         return lhs;
     }
 
-    // std::unique_ptr<fung::syntax::IStmt> parseUse();
-    // std::unique_ptr<fung::syntax::IStmt> parseVar();
-    // std::unique_ptr<fung::syntax::IStmt> parseParam();
-    // std::unique_ptr<fung::syntax::IStmt> parseFunc();
-    // std::unique_ptr<fung::syntax::IStmt> parseField();
-    // std::unique_ptr<fung::syntax::IStmt> parseObject();
-    // std::unique_ptr<fung::syntax::IStmt> parseAssign();
-    // std::unique_ptr<fung::syntax::IStmt> parseReturn();
+    std::unique_ptr<fung::syntax::IStmt> Parser::parseUse()
+    {
+        consumeToken({TokenType::token_keyword});
+
+        if (stringifyToken(getPrevious(), source_viewer) == keyword_use)
+        {
+            std::string use_name = stringifyTokenFully(getCurrent(), source_viewer);
+
+            consumeToken({TokenType::token_identifier});
+            return std::make_unique<fung::syntax::UseStmt>(use_name);
+        }
+
+        reportError(getPrevious(), "Invalid keyword in use: ");
+    }
+
+    std::unique_ptr<fung::syntax::IStmt> Parser::parseVar()
+    {
+        consumeToken({TokenType::token_keyword});
+
+        bool var_is_let;
+
+        if (stringifyToken(getPrevious(), source_viewer) == keyword_let)
+        {
+            var_is_let = true;
+        }
+        else if (stringifyToken(getPrevious(), source_viewer) == keyword_mut)
+        {
+            var_is_let = false;
+        }
+        else
+        {
+            reportError(getPrevious(), "Invalid keyword for var decl: ");
+        }
+
+        consumeToken({TokenType::token_identifier});
+
+        std::string var_name = stringifyTokenFully(getPrevious(), source_viewer);
+
+        consumeToken({TokenType::token_op_assign});
+
+        auto rvalue = parseConditional();
+
+        return std::make_unique<fung::syntax::VarStmt>(std::move(rvalue), var_name, var_is_let);
+    }
+
+    std::unique_ptr<fung::syntax::IStmt> Parser::parseParam()
+    {
+        consumeToken({TokenType::token_keyword});
+
+        bool param_is_val;
+
+        if (stringifyToken(getPrevious(), source_viewer) == keyword_val)
+        {
+            param_is_val = true;
+        }
+        else if (stringifyToken(getPrevious(), source_viewer) == keyword_ref)
+        {
+            param_is_val = false;
+        }
+        else
+        {
+            reportError(getPrevious(), "Invalid keyword for function param: ");
+        }
+
+        consumeToken({TokenType::token_identifier});
+
+        std::string param_name = stringifyTokenFully(getPrevious(), source_viewer);
+
+        return std::make_unique<fung::syntax::ParamDecl>(param_name, param_is_val);
+    }
+
+    std::unique_ptr<fung::syntax::IStmt> Parser::parseFunc()
+    {
+        consumeToken({TokenType::token_keyword});
+
+        std::string callee_name;
+
+        if (stringifyToken(getPrevious(), source_viewer) == keyword_fun)
+        {
+            callee_name = stringifyToken(getCurrent(), source_viewer);
+        }
+        else
+        {
+            reportError(getPrevious(), "Invalid keyword for function decl: ");
+        }
+
+        consumeToken({TokenType::token_identifier});
+        consumeToken({TokenType::token_lparen});
+
+        std::vector<std::unique_ptr<fung::syntax::ParamDecl>> callee_params {};
+
+        while (!matchToken({TokenType::token_rparen}))
+        {
+            auto temp_param = parseParam();
+            callee_params.emplace_back(std::move(temp_param));
+
+            consumeToken({TokenType::token_comma});
+        }
+
+        consumeToken({TokenType::token_rparen});
+
+        auto callee_body = parseBlock();
+
+        return std::make_unique<fung::syntax::FuncDecl>(std::move(callee_body), std::move(callee_params), callee_name);
+    }
+
+    std::unique_ptr<fung::syntax::IStmt> Parser::parseField()
+    {
+        consumeToken({TokenType::token_keyword});
+
+        std::string field_name;
+
+        if (stringifyToken(getPrevious(), source_viewer) == keyword_field)
+        {
+            field_name = stringifyTokenFully(getCurrent(), source_viewer);
+        }
+        else
+        {
+            reportError(getPrevious(), "Invalid keyword for object field decl: ");
+        }
+
+        consumeToken({TokenType::token_identifier});
+
+        return std::make_unique<fung::syntax::FieldDecl>(field_name);
+    }
+
+    std::unique_ptr<fung::syntax::IStmt> Parser::parseObject()
+    {
+        consumeToken({TokenType::token_keyword});
+
+        std::string obj_type_name;
+
+        if (stringifyToken(getPrevious(), source_viewer) == keyword_object)
+        {
+            obj_type_name = stringifyTokenFully(getCurrent(), source_viewer);
+        }
+        else
+        {
+            reportError(getPrevious(), "Invalid keyword for object decl: ");
+        }
+
+        consumeToken({TokenType::token_identifier});
+
+        std::vector<std::unique_ptr<fung::syntax::FieldDecl>> temp_fields {};
+
+        while (stringifyToken(getCurrent(), source_viewer) != keyword_end)
+        {
+            auto obj_field = parseField();
+            temp_fields.emplace_back(std::move(obj_field));
+        }
+
+        consumeToken({TokenType::token_keyword});
+
+        return std::make_unique<fung::syntax::ObjectDecl>(std::move(temp_fields), obj_type_name);
+    }
+
+    std::unique_ptr<fung::syntax::IStmt> Parser::parseAssignOrExprStmt()
+    {
+        // Advance past identifier, but keep its lexeme for either case: variable assign or named expr-stmt of a call!
+        auto name_access = parseAccess();
+
+        if (matchToken(TokenType::token_op_assign))
+        {
+            consumeToken({TokenType::token_op_assign});
+            auto rhs = parseConditional();
+
+            return std::make_unique<fung::syntax::AssignStmt>(std::move(name_access), std::move(rhs));
+        }
+        else if (matchToken(TokenType::token_lparen))
+        {
+            consumeToken({TokenType::token_lparen});
+
+            std::vector<std::unique_ptr<fung::syntax::IExpr>> function_args {};
+
+            while (!matchToken(TokenType::token_rparen))
+            {
+                auto temp_arg = parseElement();
+                function_args.emplace_back(std::move(temp_arg));
+
+                consumeToken({TokenType::token_comma});
+            }
+
+            consumeToken({TokenType::token_rparen});
+
+            return std::make_unique<fung::syntax::ExprStmt>(std::move(function_args), std::move(name_access));
+        }
+    }
+
+    std::unique_ptr<fung::syntax::IStmt> Parser::parseReturn()
+    {
+        consumeToken({TokenType::token_keyword});
+
+        if (stringifyToken(getPrevious(), source_viewer) != keyword_ret)
+        {
+            reportError(getPrevious(), "Invalid keyword for return stmt: ");
+        }
+
+        auto result_expr = parseConditional();
+
+        return std::make_unique<fung::syntax::ReturnStmt>(std::move(result_expr));
+    }
+
     // std::unique_ptr<fung::syntax::IStmt> parseIf();
     // std::unique_ptr<fung::syntax::IStmt> parseElse();
+    // std::unique_ptr<fung::syntax::IStmt> parseWhile();
+    // std::unique_ptr<fung::syntax::IStmt> parseExprStmt();
     // std::unique_ptr<fung::syntax::IStmt> parseBlock();
     // std::unique_ptr<fung::syntax::IStmt> parseSubStmt();
     // std::unique_ptr<fung::syntax::IStmt> parseStmt();
 
     /* Parser public impl. */
+
+    // Parser(const char* source_cptr, size_t source_size);
+    // [[nodiscard]] bool parseFile(ProgramUnit& unit);
 }
