@@ -6,4 +6,4 @@ add_subdirectory(frontend)
 add_subdirectory(syntax)
 # add_subdirectory(backend)
 
-target_link_libraries(fungi PRIVATE frontend)
+target_link_libraries(fungi PRIVATE frontend PRIVATE syntax)
