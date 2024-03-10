@@ -69,7 +69,7 @@ int main (int argc, char* argv[]) {
 
     if (!fung_parser.parseFile(program))
     {
-        std::cerr << "Parsing failed!\n";
+        std::cerr << "Parsing failed for file " << program.getName() << '\n';
         return 1;
     }
 }
