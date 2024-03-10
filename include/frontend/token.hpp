@@ -1,12 +1,5 @@
-/**
- * @file token.hpp
- * @author DrkWithT
- * @brief Declare token types.
- * @date 2024-02-16
- * 
- * @copyright Copyright (c) 2024
- * 
- */
+#ifndef TOKEN_HPP
+#define TOKEN_HPP
 
 #include <string_view>
 #include <string>
@@ -63,3 +56,5 @@ namespace fung::frontend
 
     std::string stringifyTokenFully(const Token& token, const std::string_view& source);
 }
+
+#endif

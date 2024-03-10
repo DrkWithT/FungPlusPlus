@@ -72,7 +72,7 @@ namespace fung::syntax
     public:
         FuncDecl(std::unique_ptr<IStmt> body_stmt, std::vector<std::unique_ptr<IStmt>> param_list, std::string& name_lexeme);
 
-        void addParam(const std::unique_ptr<IStmt>& param_decl);
+        void addParam(std::unique_ptr<IStmt> param_decl);
 
         const std::unique_ptr<IStmt>& getBodyBlock() const;
         const std::vector<std::unique_ptr<IStmt>>& getParams() const;

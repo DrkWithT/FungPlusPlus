@@ -74,10 +74,11 @@ namespace fung::syntax
     }
 
     /* FuncDecl impl. */
+
     FuncDecl::FuncDecl(std::unique_ptr<IStmt> body_stmt, std::vector<std::unique_ptr<IStmt>> param_list, std::string& name_lexeme)
     : body(std::move(body_stmt)), params(std::move(param_list)), name(std::move(name_lexeme)) {}
 
-    void FuncDecl::addParam(const std::unique_ptr<IStmt>& param_decl)
+    void FuncDecl::addParam(std::unique_ptr<IStmt> param_decl)
     {
         params.emplace_back(std::move(param_decl));
     }

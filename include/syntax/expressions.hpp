@@ -75,10 +75,9 @@ namespace fung::syntax
         std::vector<std::unique_ptr<IExpr>> keys;
         std::string lvalue;
     public:
-        AccessExpr(std::string& left_name);
+        AccessExpr(std::string& left_name, std::vector<std::unique_ptr<IExpr>> key_vec);
 
-        void AccessExpr::addAccessKey(std::unique_ptr<IExpr> key_expr);
-        const std::vector<std::unique_ptr<IExpr>>& AccessExpr::getKeys() const;
+        const std::vector<std::unique_ptr<IExpr>>& getKeys() const;
         const std::string& getLvalueName() const;
 
         std::any accept(ExprVisitor<std::any>& visitor) override;
@@ -106,7 +105,6 @@ namespace fung::syntax
         FungOperatorType op;
         bool nests_unaries;
     public:
-        BinaryExpr(std::unique_ptr<IExpr> left_binexpr, std::unique_ptr<IExpr> right_binexpr, FungOperatorType op_symbol);
         BinaryExpr(std::unique_ptr<IExpr> left_binexpr, std::unique_ptr<IExpr> right_binexpr, FungOperatorType op_symbol);
 
         const std::unique_ptr<IExpr>& getLeftExpr() const;

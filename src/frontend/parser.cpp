@@ -162,7 +162,7 @@ namespace fung::frontend
         while (!matchToken(TokenType::token_rbrack))
         {
             auto temp_arg = parseElement();
-            literal_args.emplace_back(temp_arg);
+            literal_args.emplace_back(std::move(temp_arg));
 
             consumeToken({TokenType::token_comma});
         }
@@ -181,7 +181,7 @@ namespace fung::frontend
         while (!matchToken(TokenType::token_rbrace))
         {
             auto temp_arg = parseElement();
-            object_args.emplace_back(temp_arg);
+            object_args.emplace_back(std::move(temp_arg));
 
             consumeToken({TokenType::token_comma});
         }
@@ -227,7 +227,7 @@ namespace fung::frontend
         }
         else if (token_string)
         {
-            auto value_str = std::make_unique<fung::syntax::ElementExpr>(stringifyTokenFully(getCurrent(), source_viewer));
+            auto value_str = std::make_unique<fung::syntax::ElementExpr>(stringifyTokenFully(getCurrent(), source_viewer), FungLiteralType::fung_simple_type_string);
 
             consumeToken({TokenType::token_string});
             return value_str;
@@ -291,6 +291,7 @@ namespace fung::frontend
     {
         consumeToken({TokenType::token_identifier});
 
+
         std::string lvalue_name = stringifyTokenFully(getPrevious(), source_viewer);
         std::vector<std::unique_ptr<fung::syntax::IExpr>> keys {};
 
@@ -329,7 +330,7 @@ namespace fung::frontend
         {
             auto inner_element = parseElement();
 
-            return std::make_unique<fung::syntax::UnaryExpr>(inner_element, op_type);
+            return std::make_unique<fung::syntax::UnaryExpr>(std::move(inner_element), op_type);
         }
 
         auto inner_access = parseAccess();
@@ -528,7 +529,7 @@ namespace fung::frontend
         consumeToken({TokenType::token_identifier});
         consumeToken({TokenType::token_lparen});
 
-        std::vector<std::unique_ptr<fung::syntax::ParamDecl>> callee_params {};
+        std::vector<std::unique_ptr<fung::syntax::IStmt>> callee_params {};
 
         while (!matchToken({TokenType::token_rparen}))
         {
@@ -582,7 +583,7 @@ namespace fung::frontend
 
         consumeToken({TokenType::token_identifier});
 
-        std::vector<std::unique_ptr<fung::syntax::FieldDecl>> temp_fields {};
+        std::vector<std::unique_ptr<fung::syntax::IStmt>> temp_fields {};
 
         while (stringifyToken(getCurrent(), source_viewer) != keyword_end)
         {

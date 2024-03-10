@@ -63,13 +63,8 @@ namespace fung::syntax
 
     /* AccessExpr impl. */
 
-    AccessExpr::AccessExpr(std::string& left_name)
-    : keys {}, lvalue(std::move(left_name)) {}
-
-    void AccessExpr::addAccessKey(std::unique_ptr<IExpr> key_expr)
-    {
-        keys.emplace_back(std::move(key_expr));
-    }
+    AccessExpr::AccessExpr(std::string& left_name, std::vector<std::unique_ptr<IExpr>> key_vec)
+    : keys(std::move(key_vec)), lvalue(std::move(left_name)) {}
 
     const std::vector<std::unique_ptr<IExpr>>& AccessExpr::getKeys() const
     {
