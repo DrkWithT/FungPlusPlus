@@ -1,8 +1,8 @@
 /**
  * @file fungi.cpp
  * @author DrkWithT
- * @brief Implements main cmd file for using the Fung language.
- * @version 0.1.0
+ * @brief Implements main utility file for the Fung bytecode interpreter.
+ * @version 0.1.1
  * @date 2024-02-16
  * 
  * @copyright Copyright (c) 2024
@@ -63,7 +63,6 @@ int main (int argc, char* argv[]) {
         return 1;
     }
 
-    fung::frontend::Token temp_token {};
     fung::frontend::Parser fung_parser {source_buffer.get(), my_file_size};
     fung::frontend::ProgramUnit program {my_filename_str};
 
