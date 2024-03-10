@@ -43,10 +43,40 @@ namespace fung::syntax
 
     /* ElementExpr impl. */
 
-    ElementExpr::ElementExpr(std::any content_box, FungSimpleType element_type)
-    : content(std::move(content_box)), type {element_type} {}
+    ElementExpr::ElementExpr(std::nullptr_t nil_value, FungSimpleType element_type)
+    {
+        std::any nil {nil_value};
+        content = nil;
+    }
 
-    const std::any& ElementExpr::getContent() const
+    ElementExpr::ElementExpr(bool bool_value, FungSimpleType element_type)
+    {
+        std::any boolean {bool_value};
+        content = boolean;
+    }
+
+    ElementExpr::ElementExpr(int integer_value, FungSimpleType element_type)
+    {
+        std::any integer {integer_value};
+        content = integer;
+    }
+
+    ElementExpr::ElementExpr(double float_value, FungSimpleType element_type)
+    {
+        std::any floaty {float_value};
+        content = floaty;
+    }
+
+    ElementExpr::ElementExpr(std::string str_value, FungSimpleType element_type)
+    {
+        std::any stringy {str_value};
+        content = stringy;
+    }
+
+    ElementExpr::ElementExpr(std::vector<std::unique_ptr<fung::syntax::IExpr>> agg_args, FungSimpleType element_type)
+    : content(std::move(agg_args)), type {element_type} {}
+
+    const std::variant<std::any, std::vector<std::unique_ptr<fung::syntax::IExpr>>>& ElementExpr::getContent() const
     {
         return content;
     }
@@ -104,10 +134,7 @@ namespace fung::syntax
     /* BinaryExpr impl. */
 
     BinaryExpr::BinaryExpr(std::unique_ptr<IExpr> left_binexpr, std::unique_ptr<IExpr> right_binexpr, FungOperatorType op_symbol)
-    : left(std::move(left_binexpr)), right(std::move(right_binexpr)), op {op_symbol}, nests_unaries {true} {}
-
-    BinaryExpr::BinaryExpr(std::unique_ptr<IExpr> left_binexpr, std::unique_ptr<IExpr> right_binexpr, FungOperatorType op_symbol)
-    : left(std::move(left_binexpr)), right(std::move(right_binexpr)), op {op_symbol}, nests_unaries {false} {}
+    : left(std::move(left_binexpr)), right(std::move(right_binexpr)), op {op_symbol}, nests_unaries {(op_symbol == FungOperatorType::fung_op_plus || op_symbol == FungOperatorType::fung_op_minus)} {}
 
     const std::unique_ptr<IExpr>& BinaryExpr::getLeftExpr() const
     {

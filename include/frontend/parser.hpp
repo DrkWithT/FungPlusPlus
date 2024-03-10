@@ -3,7 +3,6 @@
 
 #include <initializer_list>
 #include "frontend/lexer.hpp"
-#include "syntax/expressions.hpp"
 #include "syntax/statements.hpp"
 
 namespace fung::frontend
@@ -28,6 +27,7 @@ namespace fung::frontend
         std::string_view source_viewer;
         Token previous;
         Token current;
+        bool had_error;
 
         /* Token helpers */
 
@@ -44,8 +44,8 @@ namespace fung::frontend
 
         /* Expr helpers */
 
-        std::vector<std::unique_ptr<fung::syntax::IExpr>> parseListLiteral();
-        std::vector<std::unique_ptr<fung::syntax::IExpr>>  parseObjectLiteral();
+        std::unique_ptr<fung::syntax::IExpr> parseListLiteral();
+        std::unique_ptr<fung::syntax::IExpr>  parseObjectLiteral();
         std::unique_ptr<fung::syntax::IExpr> parseElement();
         std::unique_ptr<fung::syntax::IExpr> parseCall();
         std::unique_ptr<fung::syntax::IExpr> parseAccess();

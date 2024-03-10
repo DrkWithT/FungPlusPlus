@@ -1,10 +1,11 @@
 #ifndef EXPRESSIONS_HPP
 #define EXPRESSIONS_HPP
 
-#include <memory>
-#include <variant>
+#include <string>
 #include <vector>
-#include "frontend/token.hpp"
+#include <any>
+#include <variant>
+#include <memory>
 #include "syntax/exprbase.hpp"
 
 namespace fung::syntax
@@ -54,16 +55,27 @@ namespace fung::syntax
         std::any accept(ExprVisitor<std::any>& visitor) override;
     };
 
-    /// @todo Maybe add move methods for less copying in vector emplacement?
     class ElementExpr : public IExpr
     {
     private:
-        std::any content;
+        std::variant<std::any, std::vector<std::unique_ptr<fung::syntax::IExpr>>> content;
         FungSimpleType type;
     public:
+        ElementExpr(std::nullptr_t nil_value, FungSimpleType element_type);
+
+        ElementExpr(bool bool_value, FungSimpleType element_type);
+
+        ElementExpr(int integer_value, FungSimpleType element_type);
+
+        ElementExpr(double float_value, FungSimpleType element_type);
+
+        ElementExpr(std::string str_value, FungSimpleType element_type);
+
         ElementExpr(std::any content_box, FungSimpleType element_type);
 
-        const std::any& getContent() const;
+        ElementExpr(std::vector<std::unique_ptr<fung::syntax::IExpr>> agg_args, FungSimpleType element_type);
+
+        const std::variant<std::any, std::vector<std::unique_ptr<fung::syntax::IExpr>>>& getContent() const;
         FungSimpleType getType() const;
 
         std::any accept(ExprVisitor<std::any>& visitor) override;

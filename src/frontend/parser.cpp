@@ -117,15 +117,12 @@ namespace fung::frontend
         }
 
         reportError(getCurrent(), "Unexpected token: ");
+        throw std::runtime_error {""};
     }
 
     void Parser::reportError(const Token& token, const std::string& msg_header)
     {
-        std::ostringstream sout {};
-
-        sout << msg_header << "Token {begin = " << token.begin << ", type = " << token.type << "}\n";
-
-        throw std::invalid_argument {sout.str()};
+        std::cerr << msg_header << "Token {begin = " << token.begin << ", type = " << token.type << "}\n";
     }
 
     void Parser::synchronizeParse()
@@ -153,7 +150,7 @@ namespace fung::frontend
 
     /* Parser expression helpers impl. */
 
-    std::vector<std::unique_ptr<fung::syntax::IExpr>> Parser::parseListLiteral()
+    std::unique_ptr<fung::syntax::IExpr> Parser::parseListLiteral()
     {
         consumeToken({TokenType::token_lbrack});
 
@@ -169,10 +166,10 @@ namespace fung::frontend
 
         consumeToken({TokenType::token_rbrack});
 
-        return literal_args;
+        return std::make_unique<fung::syntax::ElementExpr>(std::move(literal_args), FungLiteralType::fung_simple_type_list);
     }
 
-    std::vector<std::unique_ptr<fung::syntax::IExpr>> Parser::parseObjectLiteral()
+    std::unique_ptr<fung::syntax::IExpr> Parser::parseObjectLiteral()
     {
         consumeToken({TokenType::token_lbrace});
 
@@ -186,7 +183,7 @@ namespace fung::frontend
             consumeToken({TokenType::token_comma});
         }
 
-        return object_args;
+        return std::make_unique<fung::syntax::ElementExpr>(std::move(object_args), FungLiteralType::fung_simple_type_object);
     }
 
     std::unique_ptr<fung::syntax::IExpr> Parser::parseElement()
@@ -234,17 +231,11 @@ namespace fung::frontend
         }
         else if (token_lbrack)
         {
-            auto list_values = parseListLiteral();
-            auto list_literal = std::make_unique<fung::syntax::ElementExpr>(list_values, FungLiteralType::fung_simple_type_list);
-
-            return list_literal;
+            return parseListLiteral();
         }
         else if (token_lbrace)
         {
-            auto obj_values = parseObjectLiteral();
-            auto obj_literal = std::make_unique<fung::syntax::ElementExpr>(obj_values, FungLiteralType::fung_simple_type_object);
-
-            return obj_literal;
+            return parseObjectLiteral();
         }
         else if (token_lparen)
         {
@@ -255,7 +246,8 @@ namespace fung::frontend
             return top_expr;
         }
 
-        reportError(getCurrent(), "Unexpected token");
+        reportError(getCurrent(), "Unexpected token: ");
+        throw std::runtime_error {""};
     }
 
     std::unique_ptr<fung::syntax::IExpr> Parser::parseCall()
@@ -335,7 +327,7 @@ namespace fung::frontend
 
         auto inner_access = parseAccess();
 
-        return std::make_unique<fung::syntax::UnaryExpr>(inner_access, op_type);
+        return std::make_unique<fung::syntax::UnaryExpr>(std::move(inner_access), op_type);
     }
 
     std::unique_ptr<fung::syntax::IExpr> Parser::parseFactor()
@@ -453,6 +445,7 @@ namespace fung::frontend
         }
 
         reportError(getPrevious(), "Invalid keyword in use: ");
+        throw std::runtime_error {""};
     }
 
     std::unique_ptr<fung::syntax::IStmt> Parser::parseVar()
@@ -472,6 +465,7 @@ namespace fung::frontend
         else
         {
             reportError(getPrevious(), "Invalid keyword for var decl: ");
+            throw std::runtime_error {""};
         }
 
         consumeToken({TokenType::token_identifier});
@@ -502,6 +496,7 @@ namespace fung::frontend
         else
         {
             reportError(getPrevious(), "Invalid keyword for function param: ");
+            throw std::runtime_error {""};
         }
 
         consumeToken({TokenType::token_identifier});
@@ -524,6 +519,7 @@ namespace fung::frontend
         else
         {
             reportError(getPrevious(), "Invalid keyword for function decl: ");
+            throw std::runtime_error {""};
         }
 
         consumeToken({TokenType::token_identifier});
@@ -531,7 +527,7 @@ namespace fung::frontend
 
         std::vector<std::unique_ptr<fung::syntax::IStmt>> callee_params {};
 
-        while (!matchToken({TokenType::token_rparen}))
+        while (!matchToken(TokenType::token_rparen))
         {
             auto temp_param = parseParam();
             callee_params.emplace_back(std::move(temp_param));
@@ -559,6 +555,7 @@ namespace fung::frontend
         else
         {
             reportError(getPrevious(), "Invalid keyword for object field decl: ");
+            throw std::runtime_error {""};
         }
 
         consumeToken({TokenType::token_identifier});
@@ -579,6 +576,7 @@ namespace fung::frontend
         else
         {
             reportError(getPrevious(), "Invalid keyword for object decl: ");
+            throw std::runtime_error {""};
         }
 
         consumeToken({TokenType::token_identifier});
@@ -626,6 +624,9 @@ namespace fung::frontend
 
             return std::make_unique<fung::syntax::ExprStmt>(std::move(function_args), std::move(name_access));
         }
+
+        reportError(getCurrent(), "Unknown statement at: ");
+        throw std::runtime_error {""};
     }
 
     std::unique_ptr<fung::syntax::IStmt> Parser::parseReturn()
@@ -635,6 +636,7 @@ namespace fung::frontend
         if (stringifyToken(getPrevious(), source_viewer) != keyword_ret)
         {
             reportError(getPrevious(), "Invalid keyword for return stmt: ");
+            throw std::runtime_error {""};
         }
 
         auto result_expr = parseConditional();
@@ -649,11 +651,12 @@ namespace fung::frontend
         if (stringifyToken(getPrevious(), source_viewer) != keyword_if)
         {
             reportError(getPrevious(), "Invalid keyword for if stmt: ");
+            throw std::runtime_error {""};
         }
 
         auto conditional_expr = parseConditional();
         std::vector<std::unique_ptr<fung::syntax::IStmt>> stmts {};
-        bool has_else;
+        bool has_else = false;
 
         while (!matchToken(TokenType::token_eof))
         {
@@ -694,6 +697,7 @@ namespace fung::frontend
         if (stringifyToken(getPrevious(), source_viewer) != keyword_else)
         {
             reportError(getPrevious(), "Invalid keyword for else stmt: ");
+            throw std::runtime_error {""};
         }
 
         auto block = parseBlock();
@@ -708,6 +712,7 @@ namespace fung::frontend
         if (stringifyToken(getPrevious(), source_viewer) != keyword_while)
         {
             reportError(getPrevious(), "Invalid keyword for while stmt: ");
+            throw std::runtime_error {""};
         }
 
         auto loop_conditions = parseConditional();
@@ -740,6 +745,7 @@ namespace fung::frontend
         }
 
         reportError(getCurrent(), "Unexpected token for block-lvl statement: ");
+        throw std::runtime_error {""};
     }
 
     std::unique_ptr<fung::syntax::IStmt> Parser::parseBlock()
@@ -780,12 +786,15 @@ namespace fung::frontend
         {
             return parseObject();
         }
+
+        reportError(getCurrent(), "Unknown statement at token: ");
+        throw std::runtime_error {""};
     }
 
     /* Parser public impl. */
 
     Parser::Parser(const char* source_cptr, size_t source_size)
-    : lexer {source_cptr, source_size}, source_viewer {source_cptr}, previous {.type = TokenType::token_eof}, current {.type = TokenType::token_eof} {}
+    : lexer {source_cptr, source_size}, source_viewer {source_cptr}, previous {.type = TokenType::token_eof}, current {.type = TokenType::token_eof}, had_error {false} {}
 
     [[nodiscard]] bool Parser::parseFile(ProgramUnit& unit)
     {
@@ -799,9 +808,11 @@ namespace fung::frontend
             }
             catch (std::invalid_argument& parse_err)
             {
-                std::cerr << parse_err.what() << '\n';
+                had_error = true;
                 synchronizeParse();
             }
         }
+
+        return !had_error;
     }
 }

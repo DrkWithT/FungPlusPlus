@@ -254,7 +254,7 @@ namespace fung::syntax
 
     std::any ExprStmt::accept(StmtVisitor<std::any>& visitor)
     {
-        visitor.visitExprStmt(*this);
+        return visitor.visitExprStmt(*this);
     }
 
     /* BlockStmt impl. */
