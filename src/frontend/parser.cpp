@@ -794,7 +794,7 @@ namespace fung::frontend
         {
             try
             {
-                ; // append stmt to unit!
+                unit.appendStmt(parseStmt());
             }
             catch (std::invalid_argument& parse_err)
             {

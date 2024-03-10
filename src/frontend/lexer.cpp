@@ -132,7 +132,7 @@ namespace fung::frontend
 
         position++;
 
-        return (Token) {.begin = token_start, .length = 1, .type = lexical_type};
+        return {.begin = token_start, .length = 1, .type = lexical_type};
     }
 
     Token Lexer::lexBetween(char c, TokenType lexical_type)
@@ -158,7 +158,7 @@ namespace fung::frontend
             position++;
         }
 
-        return (Token) {.begin = token_begin, .length = token_length, .type = lexical_type};
+        return {.begin = token_begin, .length = token_length, .type = lexical_type};
     }
 
     Token Lexer::lexWhitespace()
@@ -180,7 +180,7 @@ namespace fung::frontend
             position++;
         }
 
-        return (Token) {.begin = token_begin, .length = token_length, .type = token_whitespace};
+        return {.begin = token_begin, .length = token_length, .type = token_whitespace};
     }
 
     Token Lexer::lexWord()
@@ -211,10 +211,10 @@ namespace fung::frontend
 
         if (keywords.find(lexeme_str) != keywords.end())
         {
-            return (Token) {.begin = token_begin, .length = token_length, .type = token_keyword};
+            return {.begin = token_begin, .length = token_length, .type = token_keyword};
         }
 
-        return (Token) {.begin = token_begin, .length = token_length, .type = token_identifier};
+        return {.begin = token_begin, .length = token_length, .type = token_identifier};
     }
 
     Token Lexer::lexOperator()
@@ -245,10 +245,10 @@ namespace fung::frontend
 
         if (operators.find(lexeme_str) != operators.end())
         {
-            return (Token) {.begin = token_begin, .length = token_length, .type = operators.at(lexeme_str)};
+            return {.begin = token_begin, .length = token_length, .type = operators.at(lexeme_str)};
         }
 
-        return (Token) {.begin = token_begin, .length = token_length, .type = token_bad};
+        return {.begin = token_begin, .length = token_length, .type = token_bad};
     }
 
     Token Lexer::lexSpecialLiteral()
@@ -264,19 +264,19 @@ namespace fung::frontend
         /// @note Check for True, False, Nil special literals of form $<letter>...
         if (special_c == 'T')
         {
-            return (Token) {.begin = token_begin, .length = 2, .type = token_special_true};
+            return {.begin = token_begin, .length = 2, .type = token_special_true};
         }
         else if (special_c == 'F')
         {
-            return (Token) {.begin = token_begin, .length = 2, .type = token_special_false};
+            return {.begin = token_begin, .length = 2, .type = token_special_false};
         }
         else if (special_c == 'N')
         {
-            return (Token) {.begin = token_begin, .length = 2, .type = token_special_nil};
+            return {.begin = token_begin, .length = 2, .type = token_special_nil};
         }
         else
         {
-            return (Token) {.begin = token_begin, .length = 2, .type = token_bad};
+            return {.begin = token_begin, .length = 2, .type = token_bad};
         }
     }
 
@@ -308,11 +308,11 @@ namespace fung::frontend
         switch (dot_count)
         {
         case 0:
-            return (Token) {.begin = token_begin, .length = token_length, .type = token_integer};
+            return {.begin = token_begin, .length = token_length, .type = token_integer};
         case 1:
-            return (Token) {.begin = token_begin, .length = token_length, .type = token_float};
+            return {.begin = token_begin, .length = token_length, .type = token_float};
         default:
-            return (Token) {.begin = token_begin, .length = token_length, .type = token_bad};
+            return {.begin = token_begin, .length = token_length, .type = token_bad};
         }
     }
 
@@ -320,7 +320,7 @@ namespace fung::frontend
     {
         if (position >= limit)
         {
-            return (Token) {.begin = limit, .length = 1, .type = token_eof};
+            return {.begin = limit, .length = 1, .type = token_eof};
         }
 
         char letter = source_view[position];
@@ -374,6 +374,6 @@ namespace fung::frontend
 
         position++;
 
-        return (Token) {.begin = position - 1, .length = 1, .type = token_bad};
+        return {.begin = position - 1, .length = 1, .type = token_bad};
     }
 }

@@ -13,7 +13,7 @@
 #include <memory>
 #include <iostream>
 #include <fstream>
-#include "frontend/lexer.hpp"
+#include "frontend/parser.hpp"
 
 using my_token_type = fung::frontend::TokenType;
 
@@ -47,22 +47,29 @@ using my_token_type = fung::frontend::TokenType;
 }
 
 int main (int argc, char* argv[]) {
+    if (argc < 2)
+    {
+        std::cerr << "Usage: ./bin/fungi <file>\n";
+        return 1;
+    }
+
     std::unique_ptr<char[]> source_buffer {};
     size_t my_file_size = 0;
+    std::string my_filename_str {argv[1]};
 
-    if (!readAFile("./examples/test07.fung", source_buffer, &my_file_size))
+    if (!readAFile(my_filename_str.c_str(), source_buffer, &my_file_size))
     {
-        std::cerr << "Failed to read file :(\n";
+        std::cerr << "Failed to read given file at path.\n";
         return 1;
     }
 
     fung::frontend::Token temp_token {};
-    fung::frontend::Lexer lexer {source_buffer.get(), my_file_size};
+    fung::frontend::Parser fung_parser {source_buffer.get(), my_file_size};
+    fung::frontend::ProgramUnit program {my_filename_str};
 
-    do
+    if (!fung_parser.parseFile(program))
     {
-        temp_token = lexer.lexNext();
-
-        std::cout << "Token {type=" << temp_token.type << ", begin=" << temp_token.begin << ", length=" << temp_token.length << "}\n";
-    } while (temp_token.type != my_token_type::token_eof);
+        std::cerr << "Parsing failed!\n";
+        return 1;
+    }
 }
