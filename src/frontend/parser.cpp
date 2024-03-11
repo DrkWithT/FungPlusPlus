@@ -35,7 +35,7 @@ namespace fung::frontend
     /* ProgramUnit impl. */
 
     ProgramUnit::ProgramUnit(const std::string& unit_name)
-    : statements {}, name(std::move(unit_name)) {}
+    : statements {}, name {unit_name} {}
 
     const std::vector<std::unique_ptr<fung::syntax::IStmt>>& ProgramUnit::getStatements() const
     {
@@ -113,6 +113,7 @@ namespace fung::frontend
             {
                 previous = current;
                 current = advanceToken();
+                return;
             }
         }
 
@@ -189,22 +190,21 @@ namespace fung::frontend
     std::unique_ptr<fung::syntax::IExpr> Parser::parseElement()
     {
         TokenType temp_type = getCurrent().type;
-
-        if (temp_type == token_special_nil)
+        if (matchToken(TokenType::token_special_nil))
         {
             auto value_nil = std::make_unique<fung::syntax::ElementExpr>(nullptr, FungLiteralType::fung_simple_type_nil);
 
             consumeToken({TokenType::token_special_nil});
             return value_nil;
         }
-        else if (temp_type == token_special_true || temp_type == token_special_false)
+        else if (matchToken(TokenType::token_special_true) || matchToken(TokenType::token_special_false))
         {
             auto value_bool = std::make_unique<fung::syntax::ElementExpr>((temp_type == token_special_true), FungLiteralType::fung_simple_type_bool);
 
             consumeToken({TokenType::token_special_true, TokenType::token_special_false});
             return value_bool;
         }
-        else if (token_integer)
+        else if (matchToken(TokenType::token_integer))
         {
             int x = std::stoi(stringifyTokenFully(getCurrent(), source_viewer));
 
@@ -213,7 +213,7 @@ namespace fung::frontend
             consumeToken({TokenType::token_integer});
             return value_int;
         }
-        else if (token_float)
+        else if (matchToken(TokenType::token_float))
         {
             double x = std::stod(stringifyTokenFully(getCurrent(), source_viewer));
 
@@ -222,28 +222,33 @@ namespace fung::frontend
             consumeToken({TokenType::token_float});
             return value_float;
         }
-        else if (token_string)
+        else if (matchToken(TokenType::token_string))
         {
             auto value_str = std::make_unique<fung::syntax::ElementExpr>(stringifyTokenFully(getCurrent(), source_viewer), FungLiteralType::fung_simple_type_string);
 
             consumeToken({TokenType::token_string});
             return value_str;
         }
-        else if (token_lbrack)
+        else if (matchToken(TokenType::token_lbrack))
         {
             return parseListLiteral();
         }
-        else if (token_lbrace)
+        else if (matchToken(TokenType::token_lbrace))
         {
             return parseObjectLiteral();
         }
-        else if (token_lparen)
+        else if (matchToken(TokenType::token_lparen))
         {
             consumeToken({TokenType::token_lparen});
             auto top_expr = parseConditional();
             consumeToken({TokenType::token_rparen});
 
             return top_expr;
+        }
+        else if (matchToken(TokenType::token_op_extract))
+        {
+            consumeToken({TokenType::token_op_extract});
+            return parseCall();
         }
 
         reportError(getCurrent(), "Unexpected token: ");
@@ -264,12 +269,12 @@ namespace fung::frontend
             auto temp_arg = parseElement();
             function_args.emplace_back(std::move(temp_arg));
 
-            consumeToken({TokenType::token_comma});
+            consumeToken({TokenType::token_comma, TokenType::token_rparen});
         }
 
         consumeToken({TokenType::token_rparen});
 
-        auto fn_call = fung::syntax::CallExpr(function_name);
+        fung::syntax::CallExpr fn_call {function_name};
 
         for (auto&& arg_uptr : function_args)
         {
@@ -283,9 +288,14 @@ namespace fung::frontend
     {
         consumeToken({TokenType::token_identifier});
 
-
         std::string lvalue_name = stringifyTokenFully(getPrevious(), source_viewer);
         std::vector<std::unique_ptr<fung::syntax::IExpr>> keys {};
+
+        /// NOTE: Since access expressions can also be for callees by name, skip field accesses (possible key checks) in that case...
+        if (matchToken(TokenType::token_lparen))
+        {
+            return std::make_unique<fung::syntax::AccessExpr>(lvalue_name, std::move(keys));
+        }
 
         consumeToken({TokenType::token_lbrack});
 
@@ -532,7 +542,7 @@ namespace fung::frontend
             auto temp_param = parseParam();
             callee_params.emplace_back(std::move(temp_param));
 
-            consumeToken({TokenType::token_comma});
+            consumeToken({TokenType::token_comma, TokenType::token_rparen});
         }
 
         consumeToken({TokenType::token_rparen});
@@ -617,7 +627,7 @@ namespace fung::frontend
                 auto temp_arg = parseElement();
                 function_args.emplace_back(std::move(temp_arg));
 
-                consumeToken({TokenType::token_comma});
+                consumeToken({TokenType::token_comma, TokenType::token_rparen});
             }
 
             consumeToken({TokenType::token_rparen});
@@ -723,7 +733,12 @@ namespace fung::frontend
 
     std::unique_ptr<fung::syntax::IStmt> Parser::parseSubStmt()
     {
-        if (matchToken(TokenType::token_identifier))
+        if (matchToken(token_comment))
+        {
+            consumeToken({});
+            return nullptr;
+        }
+        else if (matchToken(TokenType::token_identifier))
         {
             return parseAssignOrExprStmt();
         }
@@ -770,7 +785,12 @@ namespace fung::frontend
 
     std::unique_ptr<fung::syntax::IStmt> Parser::parseStmt()
     {
-        if (stringifyToken(getCurrent(), source_viewer) == keyword_use)
+        if (matchToken(token_comment))
+        {
+            consumeToken({});
+            return nullptr;
+        }
+        else if (stringifyToken(getCurrent(), source_viewer) == keyword_use)
         {
             return parseUse();
         }
@@ -787,7 +807,7 @@ namespace fung::frontend
             return parseObject();
         }
 
-        reportError(getCurrent(), "Unknown statement at token: ");
+        reportError(getCurrent(), "Unknown statement token at: ");
         throw std::runtime_error {""};
     }
 
@@ -804,7 +824,12 @@ namespace fung::frontend
         {
             try
             {
-                unit.appendStmt(parseStmt());
+                auto temp_stmt = parseStmt();
+
+                if (temp_stmt)
+                {
+                    unit.appendStmt(std::move(temp_stmt));
+                }
             }
             catch (std::invalid_argument& parse_err)
             {

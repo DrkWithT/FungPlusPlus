@@ -17,13 +17,13 @@
 
 using my_token_type = fung::frontend::TokenType;
 
-[[nodiscard]] bool readAFile(const char* path, std::unique_ptr<char[]>& result, size_t* external_size)
+[[nodiscard]] std::unique_ptr<char[]> readAFile(const char* path, size_t* external_size)
 {
     std::ifstream reader {path, std::ios::in};
 
     if (!reader.is_open())
     {
-        return false;
+        return nullptr;
     }
 
     size_t input_size = 0;
@@ -33,17 +33,16 @@ using my_token_type = fung::frontend::TokenType;
 
     auto buffer = std::make_unique<char[]>(input_size + 1);
 
-    std::fill(buffer.get(), buffer.get() + input_size, '\0');
+    std::fill(buffer.get(), buffer.get() + input_size + 1, '\0');
 
     bool read_ok = !reader.read(buffer.get(), input_size).bad();
 
     if (read_ok)
     {
-        result.reset(buffer.release());
         *external_size = input_size;
     }
 
-    return read_ok;
+    return buffer;
 }
 
 int main (int argc, char* argv[]) {
@@ -53,11 +52,11 @@ int main (int argc, char* argv[]) {
         return 1;
     }
 
-    std::unique_ptr<char[]> source_buffer {};
     size_t my_file_size = 0;
     std::string my_filename_str {argv[1]};
+    auto source_buffer = readAFile(argv[1], &my_file_size);
 
-    if (!readAFile(my_filename_str.c_str(), source_buffer, &my_file_size))
+    if (!source_buffer || my_file_size == 0)
     {
         std::cerr << "Failed to read given file at path.\n";
         return 1;
