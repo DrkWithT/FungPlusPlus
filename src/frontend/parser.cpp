@@ -2,6 +2,7 @@
  * @file parser.cpp
  * @author DrkWithT
  * @brief Implements recursive descent parser for Fung.
+ * @note See TODOs e.g add checks for early right parens, brackets, and more so that trailing commas are prevented.
  * @date 2024-02-27
  * 
  * @copyright Copyright (c) 2024
@@ -162,6 +163,7 @@ namespace fung::frontend
             auto temp_arg = parseElement();
             literal_args.emplace_back(std::move(temp_arg));
 
+            /// TODO: add check to stop early on rbrack.
             consumeToken({TokenType::token_comma});
         }
 
@@ -181,6 +183,7 @@ namespace fung::frontend
             auto temp_arg = parseElement();
             object_args.emplace_back(std::move(temp_arg));
 
+            /// TODO: add check to stop early on rbrace.
             consumeToken({TokenType::token_comma});
         }
 
@@ -251,7 +254,7 @@ namespace fung::frontend
             return parseCall();
         }
 
-        reportError(getCurrent(), "Unexpected token: ");
+        reportError(getCurrent(), "Unexpected token of elemental expr: ");
         throw std::runtime_error {""};
     }
 
@@ -269,7 +272,8 @@ namespace fung::frontend
             auto temp_arg = parseElement();
             function_args.emplace_back(std::move(temp_arg));
 
-            consumeToken({TokenType::token_comma, TokenType::token_rparen});
+            /// TODO: add check to stop early on rparen.
+            consumeToken({TokenType::token_comma});
         }
 
         consumeToken({TokenType::token_rparen});
@@ -304,6 +308,7 @@ namespace fung::frontend
             auto keying_expr = parseElement();
             keys.emplace_back(std::move(keying_expr));
 
+            /// TODO: add check to stop early on rbrack.
             consumeToken({TokenType::token_comma});
         }
 
@@ -542,7 +547,8 @@ namespace fung::frontend
             auto temp_param = parseParam();
             callee_params.emplace_back(std::move(temp_param));
 
-            consumeToken({TokenType::token_comma, TokenType::token_rparen});
+            /// TODO: add check to stop early on rparen.
+            consumeToken({TokenType::token_comma});
         }
 
         consumeToken({TokenType::token_rparen});
@@ -627,7 +633,8 @@ namespace fung::frontend
                 auto temp_arg = parseElement();
                 function_args.emplace_back(std::move(temp_arg));
 
-                consumeToken({TokenType::token_comma, TokenType::token_rparen});
+                /// TODO: add check to stop early on rparen.
+                consumeToken({TokenType::token_comma});
             }
 
             consumeToken({TokenType::token_rparen});
