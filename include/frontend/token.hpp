@@ -34,6 +34,7 @@ namespace fung::frontend
         token_op_logic_and,
         token_op_logic_or,
         token_op_assign,
+        token_op_extract,
         token_comma,
         token_lparen,
         token_rparen,

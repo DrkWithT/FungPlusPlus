@@ -17,6 +17,6 @@ end
 
 fun main()
     let n = 20
-    let total = sumNumbers(n)
+    let total = @ sumNumbers(n)
     print(toString(total))
 end

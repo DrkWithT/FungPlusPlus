@@ -17,10 +17,10 @@ namespace fung::frontend
     static constexpr char test_tb = '\t';
     static constexpr char test_cr = '\r';
     static constexpr char test_lf = '\n';
-    static const char* test_operator_symbols = "?+-*/=!<>&|";
+    static const char* test_operator_symbols = "@?+-*/=!<>&|";
     
     static constexpr size_t test_keyword_count = 15;
-    static constexpr size_t test_operator_count = 14;
+    static constexpr size_t test_operator_count = 15;
     static constexpr size_t test_operator_symbols_len = 12;
 
     static const char* test_keywords[] {
@@ -56,6 +56,7 @@ namespace fung::frontend
         "&&",
         "||",
         "="
+        "@",
     };
 
     static TokenType test_operator_lextypes[] {
@@ -72,7 +73,8 @@ namespace fung::frontend
         token_op_gte,
         token_op_logic_and,
         token_op_logic_or,
-        token_op_assign
+        token_op_assign,
+        token_op_extract
     };
 
     constexpr bool isWhitespace(char c)

@@ -12,7 +12,10 @@ fun doFib(val n,)
         ret 1
     end
 
-    ret doFib(n - 1) + doFib(n - 2)
+    let x = @ doFib(n - 1)
+    let y = @ doFib(n - 2)
+
+    ret x + y
 end
 
 fun main()
